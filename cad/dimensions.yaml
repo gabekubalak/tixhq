@@ -1,0 +1,82 @@
+# GroveOS v1 home-scale appliance — physical dimensions.
+# Units: millimetres. Coordinate system: +X right, +Y up (cabinet height),
+# +Z toward the viewer (depth). Origin at the front-bottom-centre of the
+# cabinet, on the floor.
+#
+# Numbers are derived from the bill of materials in README §1. They are
+# realistic for a single-rack home unit (one of the v1 form factors) and
+# can be tweaked here without touching the renderer.
+
+units: mm
+
+cabinet:
+  width: 700        # outer W
+  depth: 650        # outer D
+  height: 1850      # outer H, just under a standard interior doorway
+  wall_thickness: 18
+
+door:
+  hinge: right                  # left | right
+  window: { width: 480, height: 1200, inset: 30 }
+
+vents:
+  pattern: louver               # louver | grid
+  count: 18
+  pitch: 14                     # mm between slat centres
+  slat_height: 6
+
+# v1 is a single rack inside the cabinet. The schema permits an array so
+# the model trivially extends to the 6-rack prosumer config later.
+racks:
+  - id: 0
+    x: 0
+    z: 60                       # offset from the back wall toward the front
+    shelves: 4
+    shelf_pitch: 360            # mm between tray surfaces
+    shelf_lowest_y: 360         # tray bottom of the lowest shelf, above composter
+    tray:    { width: 580, depth: 520, height: 60 }
+    led_panel:
+      width: 560
+      depth: 480
+      thickness: 28
+      height_above_tray: 280    # bottom of LED panel above tray surface
+      ppfd_max: 320             # used to normalise emissive intensity
+    fan:
+      diameter: 120             # Noctua NF-A12x25
+      offset_z: -260            # mounted at the back of the shelf
+    bezel_radius: 8             # rounded inner edge of the shelf opening
+
+camera:
+  mount_xyz: [-310, 1700, 60]   # pan/tilt arm anchor on the left interior wall
+  arm_length: 220
+  sensor: imx708                # informational; renderer just draws a small box
+
+front_panel:
+  # Layout on the cabinet door, offsets from the door centre.
+  lcd:   { width: 98, height: 24, x: -120, y: 1620 }   # 20x4 character LCD
+  estop: { diameter: 40,           x:  140, y: 1620 }   # latching mushroom E-stop
+
+composter:
+  width: 420
+  depth: 380
+  height: 340
+  position: [-110, 0, 70]       # front-bottom-left interior
+
+# v1 plumbing: six base nutrient reservoirs in a row at the cabinet floor.
+# The slurry and clean-water tanks are larger, placed beside the composter.
+reservoirs:
+  count: 6
+  diameter: 110
+  height: 320
+  spacing: 130                  # centre-to-centre
+  row_origin: [180, 0, 80]      # leftmost cylinder centre
+slurry_tank:
+  width: 260
+  depth: 240
+  height: 420
+  position: [-110, 0, 460]      # behind the composter
+clean_water_tank:
+  width: 220
+  depth: 200
+  height: 380
+  position: [310, 0, 460]       # back-right

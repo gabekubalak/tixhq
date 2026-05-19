@@ -8,6 +8,8 @@ Subscribes to the bus for live state; exposes:
   POST /api/safety/reset           clear a latched trip (requires presence flag)
   GET  /api/recipes                catalogue
   POST /api/zones/{id}/recipe      assign a recipe to a shelf
+  GET  /api/cad/dimensions         physical geometry for the 3D twin
+  GET  /api/stream                 SSE re-emit of live state snapshots
 
 Manual overrides require a "physically_present" flag in the request body —
 this is a soft interlock acknowledging the user is at the appliance, not a
@@ -22,13 +24,20 @@ import os
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import AsyncIterator
 
 import yaml
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from nats.aio.client import Client as NATS
 from pydantic import BaseModel
 
 RECIPES_DIR = Path(os.environ.get("GROVE_RECIPES", "/opt/grove/recipes"))
+CAD_DIMENSIONS_PATH = Path(os.environ.get(
+    "GROVE_CAD_DIMENSIONS",
+    str(Path(__file__).resolve().parents[3] / "cad" / "dimensions.yaml"),
+))
+STREAM_INTERVAL_S = float(os.environ.get("GROVE_STREAM_INTERVAL_S", "0.5"))
 
 
 class State:
@@ -133,6 +142,32 @@ async def safety_reset(ack: Ack) -> dict:
 @app.get("/api/recipes")
 def recipes() -> list[dict]:
     return [yaml.safe_load(p.read_text()) for p in RECIPES_DIR.glob("*.yaml")]
+
+
+@app.get("/api/cad/dimensions")
+def cad_dimensions() -> dict:
+    if not CAD_DIMENSIONS_PATH.exists():
+        raise HTTPException(404, f"cad dimensions not found at {CAD_DIMENSIONS_PATH}")
+    return yaml.safe_load(CAD_DIMENSIONS_PATH.read_text())
+
+
+def _snapshot() -> dict:
+    return {
+        "zones": state.zones,
+        "composter": state.composter,
+        "alerts": state.alerts,
+        "safety_trip": state.safety_trip,
+    }
+
+
+@app.get("/api/stream")
+async def stream() -> StreamingResponse:
+    async def gen() -> AsyncIterator[bytes]:
+        while True:
+            payload = json.dumps(_snapshot(), default=str)
+            yield f"data: {payload}\n\n".encode()
+            await asyncio.sleep(STREAM_INTERVAL_S)
+    return StreamingResponse(gen(), media_type="text/event-stream")
 
 
 class AssignRecipe(BaseModel):

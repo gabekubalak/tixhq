@@ -23,6 +23,11 @@
 
 <h1>GroveOS</h1>
 
+<nav class="views">
+  <a href="/3d">Open 3D twin →</a>
+  <a href="/3d/arch">Architecture view →</a>
+</nav>
+
 {#if alerts.length}
   <section class="alerts">
     <h2>Alerts</h2>
@@ -64,4 +69,6 @@
   .alert.info     { color: #06c; }
   article { border: 1px solid #ddd; padding: 1rem; margin: .5rem 0; }
   dl { display: grid; grid-template-columns: max-content auto; gap: .25rem 1rem; }
+  .views { display: flex; gap: 1rem; margin: .5rem 0 1rem; }
+  .views a { color: #06c; text-decoration: none; font-weight: 500; }
 </style>

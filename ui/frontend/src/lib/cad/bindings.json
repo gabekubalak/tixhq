@@ -1,0 +1,51 @@
+{
+  "subjects": [
+    {
+      "subject": "grove.zone.{N}.sensor.moisture",
+      "schema": "grove.zone.sensor.moisture.schema.json",
+      "partId": "shelf.{N}.tray",
+      "effect": "lerp_color",
+      "from": "#6b4a32",
+      "to":   "#2a5a8c",
+      "field": "moisture_pct",
+      "field_max": 100
+    },
+    {
+      "subject": "grove.planner.setpoint.{N}",
+      "schema": "grove.planner.setpoint.schema.json",
+      "partId": "shelf.{N}.led",
+      "effect": "emissive_by_ppfd",
+      "field": "ppfd"
+    },
+    {
+      "subject": "grove.vision.observation.{N}",
+      "schema": "grove.vision.observation.schema.json",
+      "partId": "shelf.{N}.plants",
+      "effect": "rebuild_plants"
+    },
+    {
+      "subject": "grove.composter.state",
+      "schema": "grove.composter.state.schema.json",
+      "partId": "composter",
+      "effect": "composter_phase"
+    },
+    {
+      "subject": "grove.event.alert.*",
+      "schema": "grove.event.alert.schema.json",
+      "partId": "shelf.{N}.bezel",
+      "effect": "alert_pulse"
+    },
+    {
+      "subject": "grove.event.safety.trip",
+      "schema": "grove.event.safety.trip.schema.json",
+      "partId": "estop.cap",
+      "effect": "safety_trip"
+    },
+    {
+      "subject": "grove.manifold.sensor",
+      "schema": "grove.manifold.sensor.schema.json",
+      "partId": "reservoir.{N}",
+      "effect": "highlight_active_reservoir"
+    }
+  ]
+}
