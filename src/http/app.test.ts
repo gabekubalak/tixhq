@@ -25,10 +25,13 @@ describe('app', () => {
     const res = await request(app).get('/clients/not-a-uuid/seo-report');
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('invalid client id');
+    expect(res.body.code).toBe('validation_error');
+    expect(Array.isArray(res.body.details)).toBe(true);
   });
 
-  it('returns 404 for unknown routes', async () => {
+  it('returns 404 JSON for unknown routes', async () => {
     const res = await request(app).get('/does-not-exist');
     expect(res.status).toBe(404);
+    expect(res.body).toEqual({ error: 'not found', code: 'not_found' });
   });
 });
