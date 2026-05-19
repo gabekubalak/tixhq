@@ -1,0 +1,18 @@
+[project]
+name = "sensor-ingest"
+version = "0.1.0"
+description = "Reads MCU USB-CDC stream, validates, publishes to NATS"
+requires-python = ">=3.10"
+dependencies = [
+    "nats-py>=2.6.0",
+    "pyserial>=3.5",
+    "jsonschema>=4.21",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sensor_ingest*"]

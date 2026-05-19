@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.composter.state",
+  "title": "Composter batch state",
+  "type": "object",
+  "required": ["ts", "batch_id", "phase"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":       { "type": "string", "format": "date-time" },
+    "batch_id": { "type": "string" },
+    "phase":    { "type": "string", "enum": [
+      "idle", "grinding", "mesophilic", "thermophilic", "cure", "tank_ready", "dispensing"
+    ]},
+    "temp_c":   { "type": "number" },
+    "aeration_duty_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+    "phase_started": { "type": "string", "format": "date-time" },
+    "thermo_hold_seconds": { "type": "integer", "minimum": 0 },
+    "pathogen_kill_ok":    { "type": "boolean" }
+  }
+}

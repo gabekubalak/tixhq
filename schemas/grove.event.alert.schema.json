@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.event.alert",
+  "title": "Operator-visible alert",
+  "type": "object",
+  "required": ["ts", "severity", "code", "message"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":       { "type": "string", "format": "date-time" },
+    "severity": { "type": "string", "enum": ["info", "warning", "critical"] },
+    "code":     { "type": "string" },
+    "message":  { "type": "string" },
+    "shelf_id": { "type": "integer", "minimum": 0 },
+    "actions":  { "type": "array", "items": { "type": "string" } }
+  }
+}

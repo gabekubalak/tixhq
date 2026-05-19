@@ -1,0 +1,14 @@
+[Unit]
+Description=GroveOS composter controller
+PartOf=grove.target
+After=grove-bus.service grove-safety.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/opt/grove/bin/composter-controller
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

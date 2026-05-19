@@ -1,0 +1,15 @@
+[Unit]
+Description=GroveOS local UI (FastAPI + SvelteKit, LAN only)
+PartOf=grove.target
+After=grove-bus.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/usr/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8080
+WorkingDirectory=/opt/grove/ui/backend
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

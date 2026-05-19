@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.event.safety.trip",
+  "title": "Safety supervisor trip event",
+  "description": "Latched. Requires UI acknowledgement plus physical reset.",
+  "type": "object",
+  "required": ["ts", "cause", "actuator_rail", "latched", "requires_ack"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":     { "type": "string", "format": "date-time" },
+    "cause":  { "type": "string", "enum": [
+      "leak_pan", "over_temp", "ec_runaway", "ph_low", "ph_high",
+      "mcu_heartbeat_loss", "estop", "watchdog"
+    ]},
+    "actuator_rail": { "type": "string", "enum": ["OFF", "ON"] },
+    "latched":       { "type": "boolean" },
+    "requires_ack":  { "type": "boolean" },
+    "details":       { "type": "object" }
+  }
+}

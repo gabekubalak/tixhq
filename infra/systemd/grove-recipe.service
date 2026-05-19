@@ -1,0 +1,15 @@
+[Unit]
+Description=GroveOS recipe engine
+PartOf=grove.target
+After=grove-control.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/usr/bin/python3 -m recipe_engine
+WorkingDirectory=/opt/grove/services/recipe-engine
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

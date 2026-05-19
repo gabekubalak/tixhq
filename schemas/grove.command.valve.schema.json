@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.command.valve",
+  "title": "Solenoid valve command",
+  "type": "object",
+  "required": ["ts", "valve_id", "state"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":       { "type": "string", "format": "date-time" },
+    "valve_id": { "type": "string", "pattern": "^(shelf_[0-9]+|drain_bypass)$" },
+    "state":    { "type": "string", "enum": ["open", "closed"] },
+    "duration_ms": { "type": "integer", "minimum": 0, "maximum": 600000 }
+  }
+}

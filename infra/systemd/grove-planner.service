@@ -1,0 +1,15 @@
+[Unit]
+Description=GroveOS AI planner
+PartOf=grove.target
+After=grove-vision.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/usr/bin/python3 -m ai_planner
+WorkingDirectory=/opt/grove/services/ai-planner
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

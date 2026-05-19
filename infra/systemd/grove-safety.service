@@ -1,0 +1,16 @@
+[Unit]
+Description=GroveOS safety supervisor (Jetson-side mirror)
+PartOf=grove.target
+After=grove-bus.service grove-sensor-ingest.service
+Requires=grove-bus.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/opt/grove/bin/safety-watcher
+Restart=always
+RestartSec=1
+WatchdogSec=5
+
+[Install]
+WantedBy=grove.target

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.planner.setpoint",
+  "title": "Per-zone setpoints emitted by the recipe engine / planner",
+  "type": "object",
+  "required": ["ts", "shelf_id", "ec_ms_cm", "ph", "moisture_pct"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":           { "type": "string", "format": "date-time" },
+    "shelf_id":     { "type": "integer", "minimum": 0 },
+    "phase":        { "type": "string" },
+    "ec_ms_cm":     { "type": "number", "minimum": 0, "maximum": 4.0 },
+    "ph":           { "type": "number", "minimum": 4.5, "maximum": 8.0 },
+    "moisture_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+    "air_c":        { "type": "number" },
+    "rh_pct":       { "type": "number", "minimum": 0, "maximum": 100 },
+    "ppfd":         { "type": "number", "minimum": 0 },
+    "hours_on":     { "type": "number", "minimum": 0, "maximum": 24 }
+  }
+}

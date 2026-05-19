@@ -1,0 +1,14 @@
+[Unit]
+Description=GroveOS nutrient mixer
+PartOf=grove.target
+After=grove-planner.service grove-safety.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/opt/grove/bin/nutrient-mixer
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

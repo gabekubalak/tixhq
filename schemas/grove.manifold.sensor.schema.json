@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.manifold.sensor",
+  "title": "Shared supply-manifold sensor reading",
+  "type": "object",
+  "required": ["ts", "kind", "value"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":    { "type": "string", "format": "date-time" },
+    "kind":  { "type": "string", "enum": ["ec", "ph", "flow", "temp"] },
+    "value": { "type": "number" },
+    "unit":  { "type": "string" },
+    "quality": { "type": "string", "enum": ["ok", "noisy", "stale", "fault"] }
+  }
+}

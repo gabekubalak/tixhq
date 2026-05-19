@@ -1,0 +1,15 @@
+[Unit]
+Description=GroveOS local NATS bus
+PartOf=grove.target
+Before=grove-sensor-ingest.service grove-safety.service grove-control.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/usr/local/bin/nats-server -c /etc/grove/nats-server.conf
+Restart=always
+RestartSec=2
+LimitNOFILE=65536
+
+[Install]
+WantedBy=grove.target

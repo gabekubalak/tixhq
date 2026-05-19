@@ -1,0 +1,15 @@
+[Unit]
+Description=GroveOS local alerting (buzzer / LCD / LAN companion)
+PartOf=grove.target
+After=grove-bus.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/usr/bin/python3 -m alerting
+WorkingDirectory=/opt/grove/services/alerting
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

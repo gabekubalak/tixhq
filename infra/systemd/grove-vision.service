@@ -1,0 +1,15 @@
+[Unit]
+Description=GroveOS vision inference
+PartOf=grove.target
+After=grove-recipe.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/usr/bin/python3 -m ai_vision
+WorkingDirectory=/opt/grove/services/ai-vision
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=grove.target

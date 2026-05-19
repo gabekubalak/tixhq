@@ -1,0 +1,16 @@
+[Unit]
+Description=GroveOS sensor ingestion
+PartOf=grove.target
+After=grove-bus.service
+Requires=grove-bus.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/usr/bin/python3 -m sensor_ingest
+WorkingDirectory=/opt/grove/services/sensor-ingest
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

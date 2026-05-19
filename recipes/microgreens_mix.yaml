@@ -1,0 +1,18 @@
+crop: microgreens_mix
+version: 1
+phases:
+  - name: germination
+    duration_days: 3
+    setpoints: { ec_ms_cm: 0.6, ph: 6.0, air_c: 22, rh_pct: 80, moisture_pct: 85 }
+    light:     { hours_on: 0, ppfd: 0 }
+    transition: time_only
+  - name: greening
+    duration_days: 4
+    setpoints: { ec_ms_cm: 0.8, ph: 6.0, air_c: 22, rh_pct: 65, moisture_pct: 70 }
+    light:     { hours_on: 16, ppfd: 180 }
+    transition: time_only
+harvest:
+  ready_when:
+    days_since_start_min: 7
+    vision: { leaf_area_cm2_min: 60, color_health_min: 0.80 }
+  notify: "Microgreens on shelf {shelf_id} ready to harvest"

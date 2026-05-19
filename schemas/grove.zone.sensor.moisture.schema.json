@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.zone.sensor.moisture",
+  "title": "Per-shelf substrate moisture reading",
+  "type": "object",
+  "required": ["ts", "shelf_id", "probe_id", "value_pct"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":       { "type": "string", "format": "date-time" },
+    "shelf_id": { "type": "integer", "minimum": 0 },
+    "probe_id": { "type": "string", "pattern": "^[A-Z]$" },
+    "value_pct":{ "type": "number", "minimum": 0, "maximum": 100 },
+    "raw_adc":  { "type": "integer", "minimum": 0, "maximum": 4095 },
+    "quality":  { "type": "string", "enum": ["ok", "noisy", "stale", "fault"] }
+  }
+}

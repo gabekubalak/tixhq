@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# ESP-IDF
+build/
+sdkconfig
+sdkconfig.old
+managed_components/
+dependencies.lock
+
+# Node / SvelteKit
+node_modules/
+.svelte-kit/
+ui/frontend/build/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Local state (never commit)
+data/
+state/
+logs/
+*.db
+*.db-journal
+
+# Models are tracked outside git (LFS or signed bundles)
+models/*.onnx
+models/*.bin
+models/*.txt
+
+# Secrets
+*.key
+*.pem
+minisign.sec

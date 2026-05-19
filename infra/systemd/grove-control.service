@@ -1,0 +1,15 @@
+[Unit]
+Description=GroveOS per-zone control loops
+PartOf=grove.target
+After=grove-safety.service
+Requires=grove-bus.service grove-safety.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/opt/grove/bin/control-loop
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

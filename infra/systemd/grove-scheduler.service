@@ -1,0 +1,15 @@
+[Unit]
+Description=GroveOS scheduler (light photoperiod, pump duty)
+PartOf=grove.target
+After=grove-recipe.service
+
+[Service]
+Type=simple
+User=grove
+ExecStart=/usr/bin/python3 -m scheduler
+WorkingDirectory=/opt/grove/services/scheduler
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=grove.target

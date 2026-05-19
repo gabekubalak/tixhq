@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.command.dose",
+  "title": "Peristaltic dose command",
+  "type": "object",
+  "required": ["ts", "issuer", "pump_id", "volume_ml", "max_rate_ml_s", "reason", "correlation_id"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":             { "type": "string", "format": "date-time" },
+    "issuer":         { "type": "string", "enum": ["planner", "mixer", "operator", "scheduler"] },
+    "pump_id":        { "type": "string", "enum": ["slurry", "clean_water", "n", "p", "k", "ca_mg", "ph_up", "ph_down"] },
+    "volume_ml":      { "type": "number", "exclusiveMinimum": 0, "maximum": 500 },
+    "max_rate_ml_s":  { "type": "number", "exclusiveMinimum": 0, "maximum": 5.0 },
+    "reason":         { "type": "string" },
+    "correlation_id": { "type": "string", "format": "uuid" }
+  }
+}

@@ -1,0 +1,14 @@
+# Stable symlinks for the ESP32-S3 USB-CDC devices.
+# Each board flashes a unique iSerial; match on that.
+
+SUBSYSTEM=="tty", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="1001", \
+    ATTRS{serial}=="grove-sensor-rack-0", SYMLINK+="grove-sensor-mcu-0", \
+    GROUP="grove", MODE="0660"
+
+SUBSYSTEM=="tty", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="1001", \
+    ATTRS{serial}=="grove-safety", SYMLINK+="grove-safety-mcu", \
+    GROUP="grove", MODE="0660"
+
+SUBSYSTEM=="tty", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="1001", \
+    ATTRS{serial}=="grove-composter", SYMLINK+="grove-composter-mcu", \
+    GROUP="grove", MODE="0660"

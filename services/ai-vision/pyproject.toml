@@ -1,0 +1,20 @@
+[project]
+name = "ai-vision"
+version = "0.1.0"
+description = "Per-shelf vision inference (leaf health, growth stage, deficiency)"
+requires-python = ">=3.10"
+dependencies = [
+    "nats-py>=2.6.0",
+    "onnxruntime-gpu>=1.18",
+    "numpy>=1.26",
+    "opencv-python-headless>=4.9",
+    "Pillow>=10.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ai_vision*"]
