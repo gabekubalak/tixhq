@@ -11,7 +11,7 @@ venv/
 # Rust
 target/
 **/*.rs.bk
-Cargo.lock
+# Cargo.lock is committed: every workspace member is a binary, not a library.
 
 # ESP-IDF
 build/

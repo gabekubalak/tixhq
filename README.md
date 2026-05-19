@@ -68,7 +68,14 @@ Two compute tiers talk over USB-CDC (COBS + CRC-16 framing):
 See `docs/operator-manual/getting-started.md` for first-time bring-up, and
 `docs/hardware/bom.md` for the canonical bill of materials.
 
-For development, each service is independently buildable:
+To validate the repo without hardware:
+
+```
+make verify    # byte-compile Python, validate schemas, run frame + Rust tests
+```
+
+`make help` lists the rest. For development, each service is independently
+buildable:
 
 ```
 services/sensor-ingest      python -m sensor_ingest

@@ -20,11 +20,12 @@
 //! has logged the required thermophilic hold for THIS batch, the slurry
 //! tank's output valve refuses to open.
 
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+
 use anyhow::Result;
-use async_nats::Client;
 use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
-use std::time::{Duration, Instant};
 use tokio::sync::Mutex;
 
 const THERMO_MIN_C: f64 = 55.0;
@@ -34,7 +35,13 @@ const MESO_MIN_C: f64 = 40.0;
 #[derive(Debug, Clone, Copy, Serialize)]
 #[serde(rename_all = "snake_case")]
 enum Phase {
-    Idle, Grinding, Mesophilic, Thermophilic, Cure, TankReady, Dispensing,
+    Idle,
+    Grinding,
+    Mesophilic,
+    Thermophilic,
+    Cure,
+    TankReady,
+    Dispensing,
 }
 
 struct Batch {
@@ -47,8 +54,31 @@ struct Batch {
     pathogen_kill_ok: bool,
 }
 
+impl Batch {
+    fn new() -> Self {
+        let now = Instant::now();
+        Self {
+            id: uuid::Uuid::new_v4().to_string(),
+            phase: Phase::Idle,
+            phase_started: now,
+            thermo_accumulated: Duration::ZERO,
+            last_temp: 20.0,
+            last_eval: now,
+            pathogen_kill_ok: false,
+        }
+    }
+}
+
 #[derive(Deserialize)]
-struct CompostSensor { kind: String, value: f64 }
+struct CompostSensor {
+    kind: String,
+    value: f64,
+}
+
+#[derive(Deserialize)]
+struct CompostCommand {
+    action: String,
+}
 
 #[derive(Serialize)]
 struct StateMsg<'a> {
@@ -85,7 +115,6 @@ fn advance(b: &mut Batch) {
             if b.last_temp >= THERMO_MIN_C {
                 b.thermo_accumulated += dt;
             } else if b.last_temp < MESO_MIN_C {
-                // Lost the hold; back off to mesophilic and resume aeration.
                 b.phase = Phase::Mesophilic;
                 b.phase_started = now;
             }
@@ -106,31 +135,50 @@ fn advance(b: &mut Batch) {
 async fn main() -> Result<()> {
     tracing_subscriber::fmt().init();
     let client = async_nats::connect("127.0.0.1:4222").await?;
-    let batch = Mutex::new(Batch {
-        id: uuid::Uuid::new_v4().to_string(),
-        phase: Phase::Idle,
-        phase_started: Instant::now(),
-        thermo_accumulated: Duration::ZERO,
-        last_temp: 20.0,
-        last_eval: Instant::now(),
-        pathogen_kill_ok: false,
-    });
+    let batch: Arc<Mutex<Batch>> = Arc::new(Mutex::new(Batch::new()));
 
+    // Subscriber: latest temperature feeds the state machine.
+    let batch_t = batch.clone();
     let mut sub = client.subscribe("grove.composter.sensor.*").await?;
-    let b_ref = &batch;
-    let temp_task = async move {
+    tokio::spawn(async move {
         while let Some(msg) = sub.next().await {
             let Ok(m) = serde_json::from_slice::<CompostSensor>(&msg.payload) else { continue };
             if m.kind == "temp" {
-                b_ref.lock().await.last_temp = m.value;
+                batch_t.lock().await.last_temp = m.value;
             }
         }
-    };
+    });
 
-    let pub_task = async {
-        let mut tick = tokio::time::interval(Duration::from_secs(10));
-        loop {
-            tick.tick().await;
+    // Subscriber: operator commands (start a batch / dispense slurry).
+    let batch_c = batch.clone();
+    let mut sub_cmd = client.subscribe("grove.composter.command").await?;
+    tokio::spawn(async move {
+        while let Some(msg) = sub_cmd.next().await {
+            let Ok(c) = serde_json::from_slice::<CompostCommand>(&msg.payload) else { continue };
+            let mut b = batch_c.lock().await;
+            match (c.action.as_str(), b.phase) {
+                ("start", Phase::Idle) => {
+                    *b = Batch::new();
+                    b.phase = Phase::Grinding;
+                    b.phase_started = Instant::now();
+                }
+                ("dispense", Phase::TankReady) => {
+                    b.phase = Phase::Dispensing;
+                    b.phase_started = Instant::now();
+                }
+                ("dispense_done", Phase::Dispensing) => {
+                    b.phase = Phase::TankReady;
+                }
+                _ => {}
+            }
+        }
+    });
+
+    // Publisher: every 10s, advance and emit state.
+    let mut tick = tokio::time::interval(Duration::from_secs(10));
+    loop {
+        tick.tick().await;
+        let (snapshot_bytes, _phase) = {
             let mut b = batch.lock().await;
             advance(&mut b);
             let aeration = match b.phase {
@@ -146,16 +194,10 @@ async fn main() -> Result<()> {
                 thermo_hold_seconds: b.thermo_accumulated.as_secs(),
                 pathogen_kill_ok: b.pathogen_kill_ok,
             };
-            client.publish("grove.composter.state",
-                serde_json::to_vec(&msg)?.into()).await?;
-        }
-        #[allow(unreachable_code)]
-        Ok::<(), anyhow::Error>(())
-    };
-
-    tokio::select! {
-        _ = temp_task => {},
-        _ = pub_task => {},
+            (serde_json::to_vec(&msg)?, b.phase)
+        };
+        client
+            .publish("grove.composter.state", snapshot_bytes.into())
+            .await?;
     }
-    Ok(())
 }
