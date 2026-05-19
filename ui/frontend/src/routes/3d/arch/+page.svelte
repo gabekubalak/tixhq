@@ -1,5 +1,5 @@
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import * as THREE from "three";
   import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
   import { buildArch, NS_COLOR } from "$lib/cad/buildArch.js";
@@ -74,11 +74,13 @@
     renderer?.render(scene, camera);
   }
 
-  onMount(init);
-  onDestroy(() => {
-    cancelAnimationFrame(frame);
-    window.removeEventListener("resize", onResize);
-    renderer?.dispose();
+  onMount(() => {
+    init();
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", onResize);
+      renderer?.dispose();
+    };
   });
 </script>
 

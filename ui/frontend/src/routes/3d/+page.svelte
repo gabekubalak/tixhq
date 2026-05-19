@@ -1,5 +1,5 @@
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import * as THREE from "three";
   import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
   import { loadDimensions } from "$lib/cad/dimensions.js";
@@ -117,12 +117,14 @@
     renderer?.render(scene, camera);
   }
 
-  onMount(() => { init().catch(console.error); });
-  onDestroy(() => {
-    cancelAnimationFrame(frame);
-    stop();
-    window.removeEventListener("resize", onResize);
-    renderer?.dispose();
+  onMount(() => {
+    init().catch(console.error);
+    return () => {
+      cancelAnimationFrame(frame);
+      stop();
+      window.removeEventListener("resize", onResize);
+      renderer?.dispose();
+    };
   });
 </script>
 
