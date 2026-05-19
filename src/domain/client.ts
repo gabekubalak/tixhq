@@ -7,4 +7,7 @@ export const ClientSchema = z.object({
   createdAt: z.coerce.date(),
 });
 
+export const CreateClientInputSchema = ClientSchema.omit({ id: true, createdAt: true });
+
 export type Client = z.infer<typeof ClientSchema>;
+export type CreateClientInput = z.infer<typeof CreateClientInputSchema>;
