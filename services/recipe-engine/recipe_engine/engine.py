@@ -122,6 +122,24 @@ def _harvest_ready(s: ShelfState, recipe: dict) -> bool:
     )
 
 
+async def _on_assign(
+    state: dict[int, ShelfState],
+    recipes: dict[int, dict],
+    msg,
+) -> None:
+    cmd = json.loads(msg.data)
+    sid = int(cmd["shelf_id"])
+    crop = cmd["crop"]
+    try:
+        recipe = _load_recipe(crop)
+    except FileNotFoundError:
+        log.warning("recipe not found for assign: %s", crop)
+        return
+    state[sid] = ShelfState(shelf_id=sid, crop=crop)
+    recipes[sid] = recipe
+    log.info("assigned %s to shelf %d", crop, sid)
+
+
 async def amain() -> None:
     logging.basicConfig(level=logging.INFO)
     nats = NATS()
@@ -132,6 +150,10 @@ async def amain() -> None:
     await nats.subscribe(
         "grove.vision.observation.*",
         cb=lambda m: asyncio.create_task(_on_vision(state, m)),
+    )
+    await nats.subscribe(
+        "grove.command.assign_recipe",
+        cb=lambda m: asyncio.create_task(_on_assign(state, recipes, m)),
     )
 
     while True:

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.composter.command",
+  "title": "Composter operator command",
+  "type": "object",
+  "required": ["ts", "action"],
+  "additionalProperties": false,
+  "properties": {
+    "ts":     { "type": "string", "format": "date-time" },
+    "action": { "type": "string", "enum": ["start", "dispense", "dispense_done", "cancel"] }
+  }
+}

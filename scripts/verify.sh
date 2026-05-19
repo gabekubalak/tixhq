@@ -6,6 +6,9 @@ cd "$(dirname "$0")/.."
 
 step() { printf "\n\033[1;34m==\033[0m %s\n" "$*"; }
 
+step "Install test deps (pyyaml, nats-py, pytest)"
+python3 -m pip install --quiet -r tests/requirements.txt
+
 step "Python byte-compile"
 python3 -m compileall -q services tests ui/backend
 

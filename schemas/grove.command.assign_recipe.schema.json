@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "grove.command.assign_recipe",
+  "title": "Assign a crop recipe to a shelf",
+  "type": "object",
+  "required": ["shelf_id", "crop"],
+  "additionalProperties": false,
+  "properties": {
+    "shelf_id": { "type": "integer", "minimum": 0 },
+    "crop":     { "type": "string", "pattern": "^[a-z0-9_]+$" }
+  }
+}
