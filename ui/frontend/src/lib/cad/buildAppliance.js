@@ -219,71 +219,111 @@ function buildVents(dims, group) {
   }
 }
 
+const PIPE_MAT = new THREE.MeshStandardMaterial({ color: 0xb0b0b0, roughness: 0.4, metalness: 0.7 });
+const DRIP_MAT = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.5, metalness: 0.5 });
+
 function buildRack(rack, dims, group) {
   const W = dims.cabinet.width;
+  const D = dims.cabinet.depth;
+  const t = dims.cabinet.wall_thickness;
   const trayY0 = rack.shelf_lowest_y;
+
+  // Vertical uprights — one at each corner of the grow column.
+  const upH = rack.shelf_lowest_y + rack.shelves * rack.shelf_pitch + 0.05;
+  for (const [ux, uz] of [[-W / 2 + 0.05, -0.08], [W / 2 - 0.05, -0.08],
+                           [-W / 2 + 0.05, -D + 0.08], [W / 2 - 0.05, -D + 0.08]]) {
+    const upright = new THREE.Mesh(
+      new THREE.BoxGeometry(0.025, upH, 0.025),
+      MAT.shelfFrame
+    );
+    upright.position.set(ux, upH / 2, uz);
+    group.add(upright);
+  }
+
   for (let s = 0; s < rack.shelves; s++) {
     const shelfGroup = new THREE.Group();
     shelfGroup.userData.partId = `shelf.${s}`;
     const trayY = trayY0 + s * rack.shelf_pitch;
+    const trayCenterZ = rack.z - rack.tray.depth / 2 - 0.06;
 
-    // Shelf frame (two side rails)
-    for (const railX of [-W / 2 + 0.04, W / 2 - 0.04]) {
-      const rail = new THREE.Mesh(
-        new THREE.BoxGeometry(0.012, rack.shelf_pitch, dims.cabinet.depth - 0.04),
+    // Horizontal cross-bars at this shelf level (front + back).
+    for (const cz of [-t - 0.02, -D + t + 0.02]) {
+      const bar = new THREE.Mesh(
+        new THREE.BoxGeometry(W - 0.12, 0.018, 0.025),
         MAT.shelfFrame
       );
-      rail.position.set(railX, trayY + rack.shelf_pitch / 2, -dims.cabinet.depth / 2);
-      shelfGroup.add(rail);
+      bar.position.set(rack.x, trayY, cz);
+      shelfGroup.add(bar);
+    }
+    // Two side bars connecting front/back cross-bars.
+    for (const bx of [-W / 2 + 0.06, W / 2 - 0.06]) {
+      const sbar = new THREE.Mesh(
+        new THREE.BoxGeometry(0.018, 0.018, D - 0.12),
+        MAT.shelfFrame
+      );
+      sbar.position.set(bx, trayY, -D / 2);
+      shelfGroup.add(sbar);
     }
 
-    // Tray as a shallow box with a darker rim around the soil surface
-    // so it reads as a real tray rather than a wooden brick.
-    const trayCenterZ = rack.z - rack.tray.depth / 2 - 0.06;
+    // Tray with dark rim + soil inset.
+    const soilInset = 0.012;
     const rim = new THREE.Mesh(
       new THREE.BoxGeometry(rack.tray.width, rack.tray.height, rack.tray.depth),
       MAT.trayRim
     );
     rim.position.set(rack.x, trayY + rack.tray.height / 2, trayCenterZ);
     shelfGroup.add(rim);
-    // The "soil" layer is what we tint by moisture — sits slightly inset
-    // and just above the rim's top face.
-    const soilInset = 0.015;
     const tray = new THREE.Mesh(
       new THREE.BoxGeometry(
         rack.tray.width - soilInset * 2,
-        rack.tray.height * 0.5,
+        rack.tray.height * 0.55,
         rack.tray.depth - soilInset * 2
       ),
       MAT.tray.clone()
     );
-    tray.position.set(
-      rack.x,
-      trayY + rack.tray.height * 0.75,
-      trayCenterZ
-    );
+    tray.position.set(rack.x, trayY + rack.tray.height * 0.725, trayCenterZ);
     shelfGroup.add(tag(tray, `shelf.${s}.tray`));
 
-    // Bezel ring around the front lip — used for alert pulses.
+    // Drip-irrigation manifold — a thin horizontal pipe along the rear
+    // of the tray with 6 small drippers, so it reads as a real
+    // hydroponic system rather than a plain tray.
+    const manifoldY = trayY + rack.tray.height + 0.015;
+    const manifoldZ = trayCenterZ - rack.tray.depth * 0.42;
+    const manifold = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.008, 0.008, rack.tray.width * 0.82, 12),
+      PIPE_MAT
+    );
+    manifold.rotation.z = Math.PI / 2;
+    manifold.position.set(rack.x, manifoldY, manifoldZ);
+    shelfGroup.add(manifold);
+    for (let d = 0; d < 6; d++) {
+      const dx = -rack.tray.width * 0.36 + d * rack.tray.width * 0.144;
+      const dripper = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.005, 0.005, 0.025, 8),
+        DRIP_MAT
+      );
+      dripper.position.set(rack.x + dx, manifoldY - 0.013, manifoldZ);
+      shelfGroup.add(dripper);
+    }
+
+    // Bezel alert ring
     const bezel = new THREE.Mesh(
       new THREE.TorusGeometry(rack.tray.width * 0.52, 0.008, 8, 48),
       MAT.bezelInfo.clone()
     );
     bezel.rotation.x = Math.PI / 2;
     bezel.position.set(rack.x, trayY + rack.tray.height + 0.02, rack.z - 0.04);
-    bezel.visible = false; // shows only when an alert is active
+    bezel.visible = false;
     shelfGroup.add(tag(bezel, `shelf.${s}.bezel`));
 
-    // LED panel mounted above the tray, with a real PointLight underneath
-    // so the cabinet interior actually receives light when the LEDs
-    // are on. Intensity is driven from liveBindings.applySnapshot().
+    // LED panel + real PointLight
     const ledY = trayY + rack.tray.height + rack.led_panel.height_above_tray;
     const led = new THREE.Mesh(
       new THREE.BoxGeometry(rack.led_panel.width, rack.led_panel.thickness, rack.led_panel.depth),
       MAT.led.clone()
     );
     led.position.set(rack.x, ledY, rack.z - rack.led_panel.depth / 2 - 0.06);
-    const ledLight = new THREE.PointLight(0xfff0d0, 0.0, rack.shelf_pitch * 1.4, 1.6);
+    const ledLight = new THREE.PointLight(0xfff0d0, 0.0, rack.shelf_pitch * 1.5, 1.8);
     ledLight.position.set(0, -rack.led_panel.thickness, 0);
     led.add(ledLight);
     led.userData.light = ledLight;
@@ -292,17 +332,13 @@ function buildRack(rack, dims, group) {
       light: ledLight,
     }));
 
-    // Fan at the back of the shelf
+    // Fan at the back
     const fan = new THREE.Mesh(
       new THREE.CylinderGeometry(rack.fan.diameter / 2, rack.fan.diameter / 2, 0.03, 24),
       MAT.fan
     );
     fan.rotation.x = Math.PI / 2;
-    fan.position.set(
-      rack.x,
-      trayY + rack.shelf_pitch * 0.5,
-      -dims.cabinet.depth + 0.04
-    );
+    fan.position.set(rack.x, trayY + rack.shelf_pitch * 0.5, -D + 0.04);
     shelfGroup.add(tag(fan, `shelf.${s}.fan`));
 
     group.add(shelfGroup);
@@ -333,51 +369,152 @@ function buildCamera(dims, group) {
 
 function buildComposter(dims, group) {
   const c = dims.composter;
-  const box = new THREE.Mesh(
+  const [px, py, pz] = c.position;
+  const cx = px, cy = py + c.height / 2, cz = pz - c.depth / 2;
+
+  const compGroup = new THREE.Group();
+  compGroup.userData.partId = "composter";
+  compGroup.position.set(cx, cy, cz);
+
+  // Main body
+  const body = new THREE.Mesh(
     new THREE.BoxGeometry(c.width, c.height, c.depth),
     MAT.composter.clone()
   );
-  const [px, py, pz] = c.position;
-  box.position.set(px, py + c.height / 2, pz - c.depth / 2);
-  group.add(tag(box, "composter"));
+  compGroup.add(body);
+
+  // Lid — slightly wider, darker, with a handle bar on top.
+  const lidMat = new THREE.MeshStandardMaterial({ color: 0x303030, roughness: 0.6 });
+  const lid = new THREE.Mesh(
+    new THREE.BoxGeometry(c.width + 0.01, 0.025, c.depth + 0.01),
+    lidMat
+  );
+  lid.position.y = c.height / 2 + 0.0125;
+  compGroup.add(lid);
+  const lidHandle = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.012, 0.012, c.width * 0.4, 12),
+    MAT.doorTrim
+  );
+  lidHandle.rotation.z = Math.PI / 2;
+  lidHandle.position.set(0, c.height / 2 + 0.04, 0);
+  compGroup.add(lidHandle);
+
+  // Vent grate on the top of the body — a row of thin slots.
+  const ventW = 0.03, ventH = 0.01, ventCount = 6;
+  const ventMat = new THREE.MeshStandardMaterial({ color: 0x202020 });
+  for (let i = 0; i < ventCount; i++) {
+    const vx = -c.width * 0.36 + i * c.width * 0.144;
+    const vent = new THREE.Mesh(new THREE.BoxGeometry(ventW, 0.008, c.depth * 0.55), ventMat);
+    vent.position.set(vx, c.height / 2 + 0.002, 0);
+    compGroup.add(vent);
+  }
+
+  // Front access door — a recessed square panel.
+  const doorPanelMat = new THREE.MeshStandardMaterial({ color: 0x282828, roughness: 0.55 });
+  const doorPanel = new THREE.Mesh(
+    new THREE.BoxGeometry(c.width * 0.65, c.height * 0.45, 0.012),
+    doorPanelMat
+  );
+  doorPanel.position.set(0, -c.height * 0.08, c.depth / 2 + 0.001);
+  compGroup.add(doorPanel);
+  // Door hinge studs
+  for (const dhy of [-c.height * 0.18, c.height * 0.18]) {
+    const stud = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.01, 0.01, 0.018, 10),
+      MAT.doorTrim
+    );
+    stud.rotation.x = Math.PI / 2;
+    stud.position.set(-c.width * 0.3, dhy, c.depth / 2 + 0.006);
+    compGroup.add(stud);
+  }
+
+  // Status LED (green = running, amber = thermophilic).
+  const statusLed = new THREE.Mesh(
+    new THREE.SphereGeometry(0.012, 10, 8),
+    new THREE.MeshStandardMaterial({ color: 0x00ff60, emissive: 0x00ff60, emissiveIntensity: 0.9 })
+  );
+  statusLed.position.set(c.width * 0.38, c.height * 0.38, c.depth / 2 + 0.005);
+  compGroup.add(statusLed);
+
+  group.add(compGroup);
+}
+
+function makeTextSprite(text, opts = {}) {
+  if (typeof document === "undefined") return null;
+  const { bg = "#111827", fg = "#f0f4ff", size = 180, px = 12 } = opts;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.font = `bold ${size * 0.28 | 0}px system-ui, sans-serif`;
+  const tw = ctx.measureText(text).width;
+  canvas.width = tw + px * 2 + 2;
+  canvas.height = size * 0.44;
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.roundRect?.(0, 0, canvas.width, canvas.height, 6) ?? ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fill();
+  ctx.fillStyle = fg;
+  ctx.font = `bold ${size * 0.28 | 0}px system-ui, sans-serif`;
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, px, canvas.height / 2);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.anisotropy = 4;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  const aspect = canvas.width / canvas.height;
+  sp.scale.set(aspect * 0.12, 0.12, 1);
+  return sp;
 }
 
 function buildReservoirs(dims, group) {
   const r = dims.reservoirs;
   const [ox, oy, oz] = r.row_origin;
-  const labels = ["N", "P", "K", "Ca/Mg", "pH+", "pH-"];
+  const labels     = ["N", "P", "K", "Ca/Mg", "pH+", "pH-"];
+  const labelColors = ["#7aff7a", "#e8b080", "#e8c870", "#e8e8e8", "#80a8ee", "#f08888"];
   const liquidColors = [0x6abf6a, 0xc77b58, 0xc7a258, 0xe6e6e6, 0x5599cc, 0xbf6a6a];
+  const fillRatio = 0.72;
+
   for (let i = 0; i < r.count; i++) {
     const stand = new THREE.Group();
     stand.userData.partId = `reservoir.${i}`;
     stand.userData.label = `${labels[i]} reservoir`;
-    // Transparent outer shell.
+
+    // Transparent outer shell (open-ended cylinder for better see-through).
     const shell = new THREE.Mesh(
       new THREE.CylinderGeometry(r.diameter / 2, r.diameter / 2, r.height, 28, 1, true),
       MAT.reservoir
     );
     shell.renderOrder = 2;
     stand.add(shell);
-    // Inner liquid at ~70% fill, one colour per reservoir so you can tell
-    // them apart at a glance.
-    const fillRatio = 0.72;
+
+    // Coloured liquid column.
     const liquid = new THREE.Mesh(
-      new THREE.CylinderGeometry(r.diameter * 0.49, r.diameter * 0.49, r.height * fillRatio, 28),
+      new THREE.CylinderGeometry(r.diameter * 0.47, r.diameter * 0.47, r.height * fillRatio, 28),
       new THREE.MeshStandardMaterial({ color: liquidColors[i], roughness: 0.3 })
     );
     liquid.position.y = -r.height * (1 - fillRatio) / 2;
     stand.add(liquid);
-    // Cap on top.
-    const cap = new THREE.Mesh(
-      new THREE.CylinderGeometry(r.diameter * 0.52, r.diameter * 0.5, r.height * 0.04, 28),
-      MAT.foot
-    );
-    cap.position.y = r.height / 2;
-    stand.add(cap);
+
+    // Bottom disc + cap.
+    for (const [yp, rad] of [[- r.height / 2, r.diameter / 2], [r.height / 2, r.diameter * 0.52]]) {
+      const disc = new THREE.Mesh(
+        new THREE.CylinderGeometry(rad, rad, 0.012, 28),
+        MAT.foot
+      );
+      disc.position.y = yp;
+      stand.add(disc);
+    }
+
+    // Text sprite label floating above the cap.
+    const sprite = makeTextSprite(labels[i], { fg: labelColors[i] });
+    if (sprite) {
+      sprite.position.set(0, r.height / 2 + 0.1, 0);
+      stand.add(sprite);
+    }
+
     stand.position.set(ox + i * r.spacing, oy + r.height / 2, oz);
     group.add(stand);
   }
 
+  // Slurry tank — slightly rougher opaque brown box.
   const slurry = new THREE.Mesh(
     new THREE.BoxGeometry(dims.slurry_tank.width, dims.slurry_tank.height, dims.slurry_tank.depth),
     MAT.slurry
@@ -385,14 +522,37 @@ function buildReservoirs(dims, group) {
   const [sx, sy, sz] = dims.slurry_tank.position;
   slurry.position.set(sx, sy + dims.slurry_tank.height / 2, sz - dims.slurry_tank.depth / 2);
   group.add(tag(slurry, "slurry_tank"));
+  const sSprite = makeTextSprite("Slurry", { fg: "#c8a870" });
+  if (sSprite) { sSprite.position.set(sx, sy + dims.slurry_tank.height + 0.1, sz - dims.slurry_tank.depth / 2); group.add(sSprite); }
 
+  // Clean-water tank — semi-transparent blue.
   const cw = new THREE.Mesh(
     new THREE.BoxGeometry(dims.clean_water_tank.width, dims.clean_water_tank.height, dims.clean_water_tank.depth),
     MAT.cleanWater
   );
-  const [cx, cy, cz] = dims.clean_water_tank.position;
-  cw.position.set(cx, cy + dims.clean_water_tank.height / 2, cz - dims.clean_water_tank.depth / 2);
+  const [cwx, cwy, cwz] = dims.clean_water_tank.position;
+  cw.position.set(cwx, cwy + dims.clean_water_tank.height / 2, cwz - dims.clean_water_tank.depth / 2);
+  cw.renderOrder = 2;
   group.add(tag(cw, "clean_water_tank"));
+  const cwSprite = makeTextSprite("H₂O", { fg: "#90d8f8" });
+  if (cwSprite) { cwSprite.position.set(cwx, cwy + dims.clean_water_tank.height + 0.1, cwz - dims.clean_water_tank.depth / 2); group.add(cwSprite); }
+
+  // Header pipe connecting the slurry tank to the reservoir row — the
+  // visible plumbing that ties the nutrient loop together visually.
+  const pipeStart = new THREE.Vector3(sx, sy + dims.slurry_tank.height * 0.7, sz - dims.slurry_tank.depth / 2);
+  const pipeEnd   = new THREE.Vector3(ox, oy + r.height * 0.85, oz);
+  const pipeLen   = pipeStart.distanceTo(pipeEnd);
+  const pipeMid   = pipeStart.clone().lerp(pipeEnd, 0.5);
+  const pipe = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.012, 0.012, pipeLen, 12),
+    PIPE_MAT
+  );
+  pipe.position.copy(pipeMid);
+  pipe.quaternion.setFromUnitVectors(
+    new THREE.Vector3(0, 1, 0),
+    pipeEnd.clone().sub(pipeStart).normalize()
+  );
+  group.add(pipe);
 }
 
 export function buildAppliance(dims) {

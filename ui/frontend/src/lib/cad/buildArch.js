@@ -93,6 +93,27 @@ function makeLabel(text, color = "#ffffff") {
   return sp;
 }
 
+// Tier labels for the arch scene — rendered as canvas sprites so they
+// stay readable at any camera angle.
+function makeTierLabel(text) {
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 512; canvas.height = 60;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "rgba(20,26,36,0.0)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgba(255,255,255,0.18)";
+  ctx.fillRect(0, canvas.height - 2, canvas.width, 2);
+  ctx.fillStyle = "#8090b0";
+  ctx.font = "bold 28px system-ui, sans-serif";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 10, canvas.height / 2);
+  const tex = new THREE.CanvasTexture(canvas);
+  const sp  = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+  sp.scale.set(2.2, 0.26, 1);
+  return sp;
+}
+
 export function buildArch() {
   const root = new THREE.Group();
   root.userData.partId = "arch";
@@ -105,6 +126,24 @@ export function buildArch() {
   plane.rotation.x = -Math.PI / 2;
   plane.position.y = -0.02;
   root.add(plane);
+
+  // Tier separator lines + labels.
+  const tierDefs = [
+    { y: TIER_Y[0], label: "Tier 0 — Embedded MCUs (ESP32-S3, FreeRTOS)" },
+    { y: TIER_Y[1], label: "Tier 1 — Ingest & Control (Python / Rust)" },
+    { y: TIER_Y[2], label: "Tier 2 — AI Planner & Safety (Python / Rust)" },
+    { y: TIER_Y[3], label: "Tier 3 — Local UI (FastAPI + SvelteKit)" },
+  ];
+  for (const { y, label } of tierDefs) {
+    const line = new THREE.Mesh(
+      new THREE.BoxGeometry(7.6, 0.005, 0.005),
+      new THREE.MeshStandardMaterial({ color: 0x304060, emissive: 0x304060 })
+    );
+    line.position.set(0, y - 0.25, -0.5);
+    root.add(line);
+    const sp = makeTierLabel(label);
+    if (sp) { sp.position.set(-2.0, y - 0.18, -0.5); root.add(sp); }
+  }
 
   // Service boxes
   const nodes = {};
