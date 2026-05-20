@@ -44,13 +44,17 @@ export function applySnapshot(parts, dims, snapshot) {
       const tray = parts.get(`shelf.${sid}.tray`);
       if (tray) lerpColor(tray.material, "#6b4a32", "#2a5a8c", z.moisture_pct / 100);
     }
-    // ppfd setpoint + hours_on → LED emissive
+    // ppfd setpoint + hours_on → LED emissive + actual point light
     const led = parts.get(`shelf.${sid}.led`);
     if (led && typeof z.ppfd === "number") {
       const max = led.userData.ppfd_max || 320;
       const hoursOn = typeof z.hours_on === "number" ? z.hours_on : 16;
       const onNow = (Math.floor(now / 3600) % 24) < hoursOn;
-      led.material.emissiveIntensity = onNow ? Math.min(1.4, z.ppfd / max) : 0.0;
+      const norm = Math.min(1.4, z.ppfd / max);
+      led.material.emissiveIntensity = onNow ? norm : 0.0;
+      if (led.userData.light) {
+        led.userData.light.intensity = onNow ? norm * 6 : 0;
+      }
     }
     // vision → rebuild plants for this shelf if phase changed
     if (z.vision) {

@@ -10,7 +10,7 @@
 
   let canvas;
   let tooltip = null;
-  let doorOpen = false;
+  let doorOpen = true;     // start open so the user sees what's inside
   let renderer, scene, camera, controls, raycaster, mouse, parts, dims, applianceGroup, doorMesh;
   let stop = () => {};
   let frame;
@@ -18,45 +18,76 @@
   async function init() {
     dims = await loadDimensions();
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xeef2f5);
+    scene.background = new THREE.Color(0xeaecef);
 
-    camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.01, 50);
-    camera.position.set(1.4, 1.6, 2.0);
+    // Three-quarter product-shot angle, framed on the cabinet centre.
+    const H = dims.cabinet.height;
+    const W = dims.cabinet.width;
+    camera = new THREE.PerspectiveCamera(38, canvas.clientWidth / canvas.clientHeight, 0.01, 50);
+    camera.position.set(W * 1.6, H * 0.55, W * 1.8);
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Lighting: a key + soft fill, plus an interior point light so the
-    // cabinet interior reads correctly when the door is open.
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x444466, 0.6));
-    const key = new THREE.DirectionalLight(0xffffff, 1.0);
-    key.position.set(2, 4, 2);
+    // Lighting rig: cool hemi for ambient, warm key from front-right,
+    // cool fill from back-left, plus a soft kick from below to lift
+    // the underside of the cabinet a touch.
+    scene.add(new THREE.HemisphereLight(0xeaf0ff, 0x394050, 0.7));
+    const key = new THREE.DirectionalLight(0xfff2dc, 1.1);
+    key.position.set(W * 2, H * 1.6, W * 1.5);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.left = -W * 2;
+    key.shadow.camera.right = W * 2;
+    key.shadow.camera.top = H * 1.5;
+    key.shadow.camera.bottom = -0.2;
+    key.shadow.camera.near = 0.1;
+    key.shadow.camera.far = W * 8;
     scene.add(key);
-    const fill = new THREE.PointLight(0xfff2c0, 0.4, 4);
-    fill.position.set(0, 1.2, 0.3);
+    const fill = new THREE.DirectionalLight(0xc8d6ff, 0.35);
+    fill.position.set(-W * 1.5, H * 0.8, -W);
     scene.add(fill);
+    const kick = new THREE.PointLight(0xfff2dc, 0.25, 3);
+    kick.position.set(0, 0.4, 0.6);
+    scene.add(kick);
 
-    // Ground
+    // Ground plane sits just below the cabinet feet (footH = 0.04 m).
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(6, 6),
+      new THREE.PlaneGeometry(8, 8),
       new THREE.MeshStandardMaterial({ color: 0xd5d8db, roughness: 0.95 })
     );
     ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.04;
+    ground.receiveShadow = true;
     scene.add(ground);
 
     applianceGroup = buildAppliance(dims);
+    applianceGroup.traverse((o) => {
+      if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; }
+    });
     scene.add(applianceGroup);
+
     const plants = buildAllPlants(dims);
-    scene.add(plants);
+    plants.traverse((o) => { if (o.isMesh) o.castShadow = true; });
     applianceGroup.add(plants);
 
     parts = indexParts(applianceGroup);
     doorMesh = parts.get("cabinet.front");
+    if (doorMesh) doorMesh.visible = !doorOpen;
 
     controls = new OrbitControls(camera, canvas);
-    controls.target.set(0, dims.cabinet.height / 2, -dims.cabinet.depth / 2);
+    controls.target.set(0, H / 2, -dims.cabinet.depth / 2);
+    controls.minDistance = 0.6;
+    controls.maxDistance = 8;
+    controls.maxPolarAngle = Math.PI / 2 - 0.02;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
     controls.update();
 
     raycaster = new THREE.Raycaster();
