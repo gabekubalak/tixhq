@@ -24,8 +24,11 @@
 <h1>GroveOS</h1>
 
 <nav class="views">
-  <a href="/3d">Open 3D twin →</a>
-  <a href="/3d/arch">Architecture view →</a>
+  <a href="/recipes">Recipes</a>
+  <a href="/safety">Safety</a>
+  <a href="/composter">Composter</a>
+  <a href="/3d">3D twin →</a>
+  <a href="/3d/arch">Architecture →</a>
 </nav>
 
 {#if alerts.length}
