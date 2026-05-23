@@ -88,7 +88,7 @@ async def amain() -> None:
         return
 
     nats = NATS()
-    await nats.connect("nats://127.0.0.1:4222")
+    await nats.connect(os.environ.get("NATS_URL", "nats://127.0.0.1:4222"))
 
     # Shelf pan/tilt presets come from a config file; placeholder here.
     shelves = [Shelf(i, pan_deg=i * 45.0, tilt_deg=10.0) for i in range(4)]

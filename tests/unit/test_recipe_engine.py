@@ -96,4 +96,21 @@ def test_harvest_ready_when_both_met() -> None:
     s = ShelfState(shelf_id=0, crop="test")
     s.started = time.time() - 8 * 86400
     s.last_vision_leaf_area = 300.0
+    s.last_vision_color_health = 0.90
     assert _harvest_ready(s, _recipe()) is True
+
+
+def test_harvest_blocked_by_low_color_health() -> None:
+    s = ShelfState(shelf_id=0, crop="test")
+    s.started = time.time() - 8 * 86400
+    s.last_vision_leaf_area = 300.0
+    s.last_vision_color_health = 0.70  # below color_health_min=0.85
+    assert _harvest_ready(s, _recipe()) is False
+
+
+def test_harvest_blocked_by_insufficient_leaf_area() -> None:
+    s = ShelfState(shelf_id=0, crop="test")
+    s.started = time.time() - 8 * 86400
+    s.last_vision_leaf_area = 100.0  # below leaf_area_cm2_min=200
+    s.last_vision_color_health = 0.92
+    assert _harvest_ready(s, _recipe()) is False

@@ -8,18 +8,10 @@
 
   async function refresh() {
     try {
-      const streamRes = await fetch("/api/stream");
-      const reader = streamRes.body.getReader();
-      const { value } = await reader.read();
-      reader.cancel();
-      const text = new TextDecoder().decode(value);
-      const dataLine = text.split("\n").find(l => l.startsWith("data:"));
-      if (dataLine) {
-        const data = JSON.parse(dataLine.slice(5));
-        safetyTrip = data.safety_trip;
-      }
+      const data = await fetch("/api/safety").then(r => r.json());
+      safetyTrip = data.safety_trip ?? null;
     } catch {
-      // If stream unavailable, safety_trip stays null (no trip)
+      // backend unavailable — leave safetyTrip as-is
     }
     loading = false;
   }

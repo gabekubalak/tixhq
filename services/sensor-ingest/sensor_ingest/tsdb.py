@@ -104,7 +104,9 @@ class TSDBWriter:
         payload = "\n".join(self._buf) + "\n"
         self._buf.clear()
         try:
-            assert self._session is not None
+            if self._session is None:
+                log.error("TSDBWriter.flush called before start()")
+                return
             async with self._session.post(
                 self._url,
                 data=payload.encode(),

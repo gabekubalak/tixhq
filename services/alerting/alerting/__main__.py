@@ -60,7 +60,7 @@ async def _handle_companion(reader, writer):
 async def amain() -> None:
     logging.basicConfig(level=logging.INFO)
     nats = NATS()
-    await nats.connect("nats://127.0.0.1:4222")
+    await nats.connect(os.environ.get("NATS_URL", "nats://127.0.0.1:4222"))
     _advertise_companion()
     server = await asyncio.start_server(_handle_companion, "0.0.0.0", COMPANION_PORT)
     server._grove_clients = []

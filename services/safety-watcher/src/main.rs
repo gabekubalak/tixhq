@@ -71,7 +71,8 @@ async fn publish_trip(client: &Client, cause: &str) -> Result<()> {
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt().init();
-    let client = async_nats::connect("127.0.0.1:4222").await?;
+    let nats_url = std::env::var("NATS_URL").unwrap_or_else(|_| "127.0.0.1:4222".into());
+    let client = async_nats::connect(nats_url.as_str()).await?;
     let watch: Arc<Mutex<Watch>> = Arc::new(Mutex::new(Watch::new()));
 
     // Manifold task: trips on EC/pH bounds.
@@ -130,20 +131,29 @@ async fn main() -> Result<()> {
         }
     });
 
-    // Heartbeat task: pings the systemd watchdog and warns on stalled subs.
+    // Heartbeat task: pings the systemd watchdog and trips on stalled subs.
+    let watch_h = watch.clone();
     let mut tick = tokio::time::interval(Duration::from_millis(500));
     loop {
         tick.tick().await;
         let _ = sd_notify::notify(false, &[sd_notify::NotifyState::Watchdog]);
-        let w = watch.lock().await;
-        if w.latched {
-            continue;
-        }
-        if w.last_manifold.elapsed() > HEARTBEAT_TIMEOUT {
-            warn!("manifold heartbeat lost");
-        }
-        if w.last_compost.elapsed() > HEARTBEAT_TIMEOUT {
-            warn!("composter heartbeat lost");
+        let cause = {
+            let mut w = watch_h.lock().await;
+            if w.latched {
+                None
+            } else if w.last_manifold.elapsed() > HEARTBEAT_TIMEOUT {
+                w.latched = true;
+                Some("manifold_heartbeat_lost")
+            } else if w.last_compost.elapsed() > HEARTBEAT_TIMEOUT {
+                w.latched = true;
+                Some("composter_heartbeat_lost")
+            } else {
+                None
+            }
+        };
+        if let Some(c) = cause {
+            warn!(cause = c, "heartbeat lost — tripping safety");
+            let _ = publish_trip(&client, c).await;
         }
     }
 }

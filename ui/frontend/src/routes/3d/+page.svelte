@@ -154,6 +154,8 @@
       cancelAnimationFrame(frame);
       stop();
       window.removeEventListener("resize", onResize);
+      canvas?.removeEventListener("pointermove", onMove);
+      canvas?.removeEventListener("click", onClick);
       renderer?.dispose();
     };
   });

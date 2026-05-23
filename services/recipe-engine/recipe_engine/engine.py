@@ -36,6 +36,7 @@ class ShelfState:
     started: float = field(default_factory=time.time)
     last_vision_phase: str | None = None
     last_vision_leaf_area: float = 0.0
+    last_vision_color_health: float = 1.0
     harvest_notified: bool = False
 
 
@@ -89,6 +90,7 @@ async def _on_vision(state: dict[int, ShelfState], msg) -> None:
         return
     state[sid].last_vision_phase = obs["phase_estimate"]
     state[sid].last_vision_leaf_area = float(obs.get("leaf_area_cm2", 0.0))
+    state[sid].last_vision_color_health = float(obs.get("color_health", 1.0))
 
 
 async def _publish_setpoint(nats: NATS, s: ShelfState, phase: dict) -> None:
@@ -117,9 +119,11 @@ def _harvest_ready(s: ShelfState, recipe: dict) -> bool:
     if days < h.get("days_since_start_min", 0):
         return False
     v = h.get("vision", {})
-    return (
-        s.last_vision_leaf_area >= v.get("leaf_area_cm2_min", 0)
-    )
+    if s.last_vision_leaf_area < v.get("leaf_area_cm2_min", 0):
+        return False
+    if s.last_vision_color_health < v.get("color_health_min", 0.0):
+        return False
+    return True
 
 
 async def _on_assign(
@@ -143,7 +147,7 @@ async def _on_assign(
 async def amain() -> None:
     logging.basicConfig(level=logging.INFO)
     nats = NATS()
-    await nats.connect("nats://127.0.0.1:4222")
+    await nats.connect(os.environ.get("NATS_URL", "nats://127.0.0.1:4222"))
     state = _load_state()
     recipes = {sid: _load_recipe(s.crop) for sid, s in state.items()}
 
@@ -158,7 +162,9 @@ async def amain() -> None:
 
     while True:
         for sid, s in list(state.items()):
-            r = recipes[sid]
+            r = recipes.get(sid)
+            if r is None:
+                continue
             if _maybe_advance(s, r):
                 log.info("shelf %d -> phase %s", sid, r["phases"][s.phase_idx]["name"])
             await _publish_setpoint(nats, s, r["phases"][s.phase_idx])

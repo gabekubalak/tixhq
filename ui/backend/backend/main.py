@@ -5,6 +5,7 @@ Subscribes to the bus for live state; exposes:
   GET  /api/composter              composter state
   GET  /api/alerts                 unacknowledged alerts
   POST /api/alerts/{id}/ack        clear an alert
+  GET  /api/safety                 current safety trip state
   POST /api/safety/reset           clear a latched trip (requires presence flag)
   GET  /api/recipes                catalogue
   POST /api/zones/{id}/recipe      assign a recipe to a shelf
@@ -20,9 +21,12 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 import time
 from contextlib import asynccontextmanager
+
+log = logging.getLogger("grove-ui")
 from pathlib import Path
 from typing import AsyncIterator
 
@@ -53,7 +57,7 @@ state = State()
 
 async def _connect_bus() -> NATS:
     nats = NATS()
-    await nats.connect("nats://127.0.0.1:4222")
+    await nats.connect(os.environ.get("NATS_URL", "nats://127.0.0.1:4222"))
 
     async def on_sensor(msg):
         m = json.loads(msg.data)
@@ -139,9 +143,20 @@ async def safety_reset(ack: Ack) -> dict:
     return {"ok": True}
 
 
+@app.get("/api/safety")
+def safety() -> dict:
+    return {"safety_trip": state.safety_trip}
+
+
 @app.get("/api/recipes")
 def recipes() -> list[dict]:
-    return [yaml.safe_load(p.read_text()) for p in RECIPES_DIR.glob("*.yaml")]
+    out = []
+    for p in RECIPES_DIR.glob("*.yaml"):
+        try:
+            out.append(yaml.safe_load(p.read_text()))
+        except yaml.YAMLError as exc:
+            log.warning("skipping malformed recipe %s: %s", p.name, exc)
+    return out
 
 
 @app.get("/api/cad/dimensions")

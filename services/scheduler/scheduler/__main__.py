@@ -110,7 +110,7 @@ async def _run_pump(nats: NATS, shelves: dict[int, dict]) -> None:
 async def amain() -> None:
     logging.basicConfig(level=logging.INFO)
     nats = NATS()
-    await nats.connect("nats://127.0.0.1:4222")
+    await nats.connect(os.environ.get("NATS_URL", "nats://127.0.0.1:4222"))
     tasks: dict[int, asyncio.Task] = {}
     shelves: dict[int, dict] = {}
     pump_task: asyncio.Task | None = None

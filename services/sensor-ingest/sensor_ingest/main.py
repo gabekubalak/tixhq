@@ -97,7 +97,7 @@ async def _attach(loop: asyncio.AbstractEventLoop, nats: NATS, dev: str) -> None
 async def amain() -> None:
     logging.basicConfig(level=logging.INFO)
     nats = NATS()
-    await nats.connect("nats://127.0.0.1:4222")
+    await nats.connect(os.environ.get("NATS_URL", "nats://127.0.0.1:4222"))
     loop = asyncio.get_running_loop()
     devs = sorted(glob.glob("/dev/grove-*-mcu*"))
     if not devs:
