@@ -1,0 +1,32 @@
+[Unit]
+Description=VictoriaMetrics single-node (GroveOS sensor telemetry)
+Documentation=https://docs.victoriametrics.com/
+PartOf=grove.target
+Before=grove.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=grove
+Group=grove
+ExecStart=/usr/local/bin/victoria-metrics-prod \
+  -flagsAuthKey="" \
+  -envflag.enable \
+  -envflag.prefix=VM_ \
+  -promscrape.config= \
+  @/etc/grove/victoria-metrics.conf
+Restart=always
+RestartSec=2
+LimitNOFILE=65536
+MemoryMax=600M
+OOMPolicy=continue
+
+# Hardening
+ProtectSystem=strict
+ReadWritePaths=/var/lib/grove/tsdb
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=grove.target
