@@ -1,0 +1,65 @@
+{
+  "models": [
+    {
+      "name": "leafnet",
+      "version": "v0.3",
+      "filename": "leafnet-v0.3.onnx",
+      "format": "onnx",
+      "task": "classification",
+      "description": "MobileNetV3-Small fine-tuned on PlantVillage + in-appliance labels for leaf deficiency/pest classification",
+      "input": {
+        "shape": [1, 3, 224, 224],
+        "dtype": "float32",
+        "preprocessing": "ImageNet normalization (mean=[0.485,0.456,0.406], std=[0.229,0.224,0.225])"
+      },
+      "output": {
+        "shape": [1, 6],
+        "classes": ["germination", "seedling", "veg_early", "veg_late", "flower", "harvest_ready"]
+      },
+      "providers": ["TensorrtExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider"],
+      "sha256": "placeholder-train-and-fill"
+    },
+    {
+      "name": "leaf-seg",
+      "version": "v0.2",
+      "filename": "leaf-seg-v0.2.onnx",
+      "format": "onnx",
+      "task": "segmentation",
+      "description": "UNet for binary leaf-area segmentation from overhead shelf camera",
+      "input": {
+        "shape": [1, 3, 256, 256],
+        "dtype": "float32",
+        "preprocessing": "ImageNet normalization"
+      },
+      "output": {
+        "shape": [1, 1, 256, 256],
+        "description": "Binary mask, threshold at 0.5 for leaf vs. background"
+      },
+      "providers": ["TensorrtExecutionProvider", "CUDAExecutionProvider", "CPUExecutionProvider"],
+      "sha256": "placeholder-train-and-fill"
+    },
+    {
+      "name": "ec-drift-lgbm",
+      "version": "v0.1",
+      "filename": "ec-drift-lgbm-v0.1.txt",
+      "format": "lightgbm-text",
+      "task": "regression",
+      "description": "6-hour EC drift predictor. Allows the planner to pre-empt dosing before EC falls below setpoint.",
+      "input": {
+        "features": [
+          "ec_current", "ec_1h_avg", "ec_6h_avg", "ec_slope_1h",
+          "ph_current", "temp_current", "moisture_avg",
+          "last_dose_ml", "hours_since_dose", "light_on"
+        ],
+        "dtype": "float64"
+      },
+      "output": {
+        "description": "Predicted EC delta over next 6 hours (mS/cm). Negative means EC will fall.",
+        "dtype": "float64"
+      },
+      "sha256": "placeholder-train-and-fill"
+    }
+  ],
+  "install_path": "/opt/grove/models",
+  "note": "Actual model files (.onnx, .txt) are not committed to this repo. They ship via signed update bundles."
+}
