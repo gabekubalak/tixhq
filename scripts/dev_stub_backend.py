@@ -1,14 +1,18 @@
-"""Dev-only stub backend for the 3D twin.
+"""Dev-only stub backend for the UI.
 
 The real backend in ui/backend/backend/main.py needs FastAPI + a running
 NATS bus. For a local visual smoke-test without that stack, this stdlib
 HTTP server serves just enough:
 
   GET  /api/cad/dimensions    → cad/dimensions.yaml as JSON
-  GET  /api/stream            → SSE stream of empty/synthetic state
-  GET  /api/zones             → empty {}
-  GET  /api/composter         → empty {}
+  GET  /api/stream            → SSE stream of synthetic state
+  GET  /api/zones             → synthetic zone snapshot
+  GET  /api/composter         → synthetic composter state
   GET  /api/alerts            → []
+  GET  /api/safety            → {"safety_trip": null}
+  GET  /api/recipes           → crop recipes from recipes/
+  POST /api/zones/{id}/recipe → 200 {"ok": true}
+  POST /api/safety/reset      → 200 {"ok": true}
 
 Run:  python3 scripts/dev_stub_backend.py [--port 8080]
 
@@ -77,15 +81,26 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self) -> None:
-        if self.path == "/api/cad/dimensions":
+        p = self.path.split("?")[0]
+        if p == "/api/cad/dimensions":
             return self._send_json(200, _dims())
-        if self.path == "/api/zones":
+        if p == "/api/zones":
             return self._send_json(200, _synthetic_snapshot(time.time())["zones"])
-        if self.path == "/api/composter":
+        if p == "/api/composter":
             return self._send_json(200, _synthetic_snapshot(time.time())["composter"])
-        if self.path == "/api/alerts":
+        if p == "/api/alerts":
             return self._send_json(200, [])
-        if self.path == "/api/stream":
+        if p == "/api/safety":
+            return self._send_json(200, {"safety_trip": None})
+        if p == "/api/recipes":
+            recipes = []
+            for rp in (ROOT / "recipes").glob("*.yaml"):
+                try:
+                    recipes.append(yaml.safe_load(rp.read_text()))
+                except yaml.YAMLError:
+                    pass
+            return self._send_json(200, recipes)
+        if p == "/api/stream":
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Cache-Control", "no-store")
@@ -99,6 +114,17 @@ class Handler(BaseHTTPRequestHandler):
                     time.sleep(0.5)
             except (BrokenPipeError, ConnectionResetError):
                 return
+        self.send_response(404)
+        self.end_headers()
+
+    def do_POST(self) -> None:
+        p = self.path.split("?")[0]
+        # Consume body to keep connection healthy
+        length = int(self.headers.get("Content-Length", 0))
+        if length:
+            self.rfile.read(length)
+        if p == "/api/safety/reset" or (p.startswith("/api/zones/") and p.endswith("/recipe")):
+            return self._send_json(200, {"ok": True})
         self.send_response(404)
         self.end_headers()
 
