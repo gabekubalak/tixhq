@@ -10,9 +10,12 @@ in order:
    parts, Raspberry Pi) and Nano (~$112, ESP32 only). Build philosophy
    and self-setup live in [`../hardware/krattos-lite.md`](../hardware/krattos-lite.md)
 5. [`unit-economics.md`](unit-economics.md), margins, LTV, cash need
-5. [`gofundme-copy.md`](gofundme-copy.md), ready-to-paste GoFundMe
-   campaign copy: title, story (Kratt folklore angle), reward tiers,
-   FAQ, update schedule, social one-liners
+5. [`gofundme-copy.md`](gofundme-copy.md), the markdown master copy:
+   title, story (Kratt folklore angle), reward tiers, FAQ, update
+   schedule, social one-liners. Edit this one.
+5b. [`gofundme-story-plaintext.md`](gofundme-story-plaintext.md), the
+   same story flattened to plain text for GoFundMe's editor, which does
+   not understand markdown. This is what you actually paste in.
 7. [`image-prompts.md`](image-prompts.md), three companion image
    prompts for the campaign assets (square social crop, open-door
    harvest hero, schematic cutaway)
