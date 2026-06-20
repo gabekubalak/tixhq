@@ -94,6 +94,28 @@ This isn't a sketch on a napkin. The software is built and tested:
 The code is open and on GitHub. The part that isn't built yet, and the
 part your money pays for, is the physical box.
 
+### Not just the fancy version
+
+The full appliance is the showpiece. But the same brain runs on a
+Raspberry Pi or even a $8 microcontroller, and we want it in as many
+hands as possible. So KrattOS ships in three tiers:
+
+| Tier | What it is | Parts cost | As a kit |
+|------|------------|-----------:|---------:|
+| **Nano** | A small controller that clips onto a wire shelf rack you already own. ESP32 chip, on-device dashboard over its own WiFi. Light schedule, pump, moisture, safety. | ~$112 | ~$149 |
+| **Lite** | A Raspberry Pi running the trimmed KrattOS, full dashboard, recipe library. You bring the rack and trays, the kit brings the brain. | ~$195 | ~$279 |
+| **Full** | The finished cabinet appliance with vision AI, auto-dosing, composter, the works. | ~$2,900 | ~$4,499 |
+
+What makes the cheap tiers possible: the cabinet, the Jetson, the
+composter, and the auto-dosing rig were always the expensive parts. If
+you bring a room, a wire rack, and trays (everyone has these or can get
+them for under $80), the kit just ships the brain. Lights cycle, pump
+runs, sensors report, dashboard tells you when to top up. That's how
+most hobby hydroponics already works. KrattOS just runs it for you.
+
+This is the part of the project we're proudest of. A serious food
+appliance shouldn't cost as much as a used car to be useful.
+
 ### Where your money goes
 
 | What | Amount | Covers |
@@ -129,6 +151,20 @@ photo from the $25 tier.
 Hands-on access to the dashboard and the 3D twin once we're running,
 plus monthly behind-the-scenes updates from the workshop. Includes
 everything above.
+
+### $149, "Nano kit"
+A pre-built KrattOS Nano shipped to you. Clips onto a wire shelf rack
+you already own. ESP32 controller, relay board, pump, fan, two
+moisture probes, temperature and humidity sensor, leak sensor, water
+float, a 12V LED grow bar, drip manifold and tubing, all the wiring
+and the printed controller box. Bring your own rack, trays, seeds,
+and bucket. Estimated ship: month 6.
+
+### $279, "Lite kit"
+A pre-built KrattOS Lite. Everything in the Nano kit, plus a
+Raspberry Pi 4 pre-flashed with the trimmed KrattOS, the full
+dashboard, the recipe library, and the local logging. Same self-setup
+on a rack you already own. Estimated ship: month 6.
 
 ### $1,500, "Founding owner"
 One of the first ten units off the line, shipped to you at half the
@@ -171,6 +207,15 @@ On a signed USB stick that ships with your monthly seed pods, or one you
 download and copy across yourself. The appliance checks the signature
 before it applies anything. There's no remote way in. That's the whole
 point.
+
+**Is there a version I can actually afford?**
+Yes. KrattOS Lite is the same software running on a $45 Raspberry Pi
+and clipped onto a wire shelving rack you already own. Parts come to
+around $195. As a pre-built kit it's $279. There's also a Nano tier
+that runs on an $8 microcontroller for around $149 as a kit. You
+supply the room, a rack from the hardware store, and 1020 trays. The
+kit ships the brain. The full spec lives in the repo under
+`docs/hardware/krattos-lite.md`.
 
 **What if the goal isn't met?**
 GoFundMe lets you keep what you raise, so every dollar still moves the
@@ -240,3 +285,5 @@ Draft these now and queue them up:
   cabinet. Meet KrattOS."
 - "Named after the Estonian house spirit that does your chores out of
   old junk. This one grows lettuce."
+- "Same KrattOS, $149 version: bring a wire rack, ship you the brain.
+  Anyone can grow food."
