@@ -1,7 +1,8 @@
 # KrattOS GoFundMe Campaign Copy
 
-Ready to paste into the GoFundMe page. Swap the bracketed [placeholders]
-for your real details before you post.
+Ready to paste into the GoFundMe page. The only thing to swap before
+posting is the `[github.com/yourname/kratt]` placeholder for the real
+repo URL.
 
 ---
 
@@ -44,7 +45,7 @@ the cabinet except the food you take out of it.
 And it runs entirely on its own. No subscription. No cloud account. No
 internet connection, ever.
 
-### Why I'm building it
+### Why it should exist
 
 Right now, if you want to grow food indoors, you get one of two things.
 Either a plastic gadget that sprouts three basil leaves and calls it a
@@ -68,9 +69,9 @@ kitchen and behaves like an appliance, not a science project.
 
 In Estonian folklore, a Kratt is a little household servant. You build
 it out of whatever's lying around (straw, old tools, a broken pot), and
-it comes to life to do the chores you'd rather not. That felt exactly
-right for a machine that grows your food out of water, electricity, and
-your kitchen scraps.
+it comes to life to do the chores you'd rather not. It's the right name
+for a machine that grows your food out of water, electricity, and your
+kitchen scraps.
 
 KrattOS is the software that runs the modern Kratt.
 
@@ -117,7 +118,7 @@ move to Kickstarter later, they lift straight over.)
 
 ### $25, "Mark on the wall"
 Your name on a brass plate inside the first production KrattOS, mounted
-by the composter door. I'll email you a photo of it installed.
+by the composter door. We'll email you a photo of it installed.
 
 ### $75, "Seed library"
 A starter set of heirloom seeds for the recipes we're tuning
@@ -136,13 +137,13 @@ backers. This is the big one. It's literally how the first units get
 into the world.
 
 ### $5,000, "Restaurant install"
-Reserve one of the pilot kitchen installs. I'll deliver and set up a
+Reserve one of the pilot kitchen installs. We'll deliver and set up a
 KrattOS in your restaurant, train your team, and tune the recipes to
 your menu over the first three months. Limited to 3 backers.
 
 ### $25,000, "Founding patron"
 Fund a whole pilot site at a school, food bank, or non-profit you care
-about (I'll help you pick one if you don't have it in mind). Your name,
+about (we'll help you pick one if you don't have it in mind). Your name,
 or your foundation's, goes on the plaque at that site, and you get a
 unit of your own. Limited to 1 backer.
 
@@ -160,10 +161,10 @@ projections are in the repo.
 **Why no internet?**
 Three reasons. First, privacy: your kitchen shouldn't be a data feed.
 Second, reliability: an appliance that bricks when a subscription
-lapses is a bad deal. Third, the people I keep talking to (hospital
-food services, embassy kitchens, biosecurity labs, base mess halls)
-literally cannot put a connected device in their food chain. Build for
-them first and everyone else benefits too.
+lapses is a bad deal. Third, a lot of the people who want indoor
+farming most (hospital food services, embassy kitchens, biosecurity
+labs, base mess halls) literally cannot put a connected device in
+their food chain. Build for them first and everyone else benefits too.
 
 **So how do recipes and updates get in?**
 On a signed USB stick that ships with your monthly seed pods, or one you
@@ -171,20 +172,20 @@ download and copy across yourself. The appliance checks the signature
 before it applies anything. There's no remote way in. That's the whole
 point.
 
-**What if you don't hit the goal?**
-GoFundMe lets you keep what you raise, so every dollar still moves this
-forward. At $20k I can build one prototype and file the patent. At $30k
-I can do the full prototype run. The full goal is what unlocks the
+**What if the goal isn't met?**
+GoFundMe lets you keep what you raise, so every dollar still moves the
+project forward. $20k builds one prototype and files the patent. $30k
+covers the full prototype run. The full $45k is what unlocks the
 restaurant pilots, and the pilots are what turn this from a project into
 a business.
 
-**What if you can't finish?**
+**What if the project can't finish?**
 The real risk is the physical side: the cabinet, the plumbing, and the
-UL safety listing. None of those are done yet. If I hit a wall I can't
-get past, I'll publish everything I've learned, open up the build
-documentation, and refund the physical reward tiers ($1,500 and up)
-proportionally. The brass plates and seed libraries ship no matter
-what, since they cost almost nothing.
+UL safety listing. None of those are done yet. If the project hits a
+wall it can't get past, everything learned gets published, the build
+documentation goes fully open, and the physical reward tiers ($1,500
+and up) get refunded proportionally. The brass plates and seed
+libraries ship no matter what, since they cost almost nothing.
 
 **Is it open source?**
 The firmware, control loops, schemas, and update system are MIT
@@ -199,13 +200,13 @@ right away. These aren't tax-deductible, since this isn't a registered
 non-profit.
 
 **Who's behind this?**
-[Your name, a line or two on your background, and your GitHub link.] The
-code is public, so if you want proof, read the commit history.
+The project, not the people. KrattOS is open on GitHub, so if you want
+proof, the commit history is right there. Go read it before you back it.
 
-**How do I reach you?**
-Email me at [you@example.com]. Code lives at
-[github.com/yourname/kratt]. Once we pass the first $5k, I'll post
-updates here every week.
+**How do I follow along?**
+Updates post here on the campaign page, every week or two once we're
+past the first $5k. The code keeps shipping at
+[github.com/yourname/kratt] in the meantime.
 
 ---
 
@@ -231,11 +232,11 @@ Draft these now and queue them up:
 
 ## Social one-liners (for sharing)
 
-- "I built an indoor farm that grows your salad and runs zero cloud. Now
-  I'm crowdfunding the box. KrattOS."
+- "An indoor farm that grows your salad and runs zero cloud. Crowdfunding
+  the box now. KrattOS."
 - "Nobody's building this: an AI farm for people who don't want their
   kitchen on the internet."
-- "Years of code, 49 passing tests, zero cloud. Time to put it in a
+- "Years of code. 49 passing tests. Zero cloud. Time to put it in a
   cabinet. Meet KrattOS."
-- "It's named after the Estonian house spirit that does your chores out
-  of old junk. Mine grows lettuce."
+- "Named after the Estonian house spirit that does your chores out of
+  old junk. This one grows lettuce."
