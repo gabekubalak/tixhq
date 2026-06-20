@@ -1,0 +1,29 @@
+[Unit]
+# KrattOS Lite: the DIY "bring your own rack" profile.
+#
+# Same codebase as the full appliance, but only the services that make
+# sense without a Jetson, a camera, an auto-dosing rig, or a composter.
+# Runs comfortably on a Raspberry Pi 4 (2GB).
+#
+# Dropped vs the full kratt.target:
+#   kratt-vision      no camera / no Jetson  -> grower eyeballs the plants
+#   kratt-planner     ML planner             -> recipe-engine rules suffice
+#   kratt-mixer       auto EC/pH dosing      -> app tells you, you pour
+#   kratt-composter   no composter           -> use bought nutrients
+#   kratt-timeseries  VictoriaMetrics        -> lightweight local logging
+#
+# Enable with:  systemctl enable --now kratt-lite.target
+Description=KrattOS Lite (DIY single-rack profile)
+Requires=multi-user.target
+After=multi-user.target
+Wants=kratt-bus.service \
+      kratt-sensor-ingest.service \
+      kratt-recipe.service \
+      kratt-scheduler.service \
+      kratt-control.service \
+      kratt-safety.service \
+      kratt-alerting.service \
+      kratt-ui.service
+
+[Install]
+WantedBy=multi-user.target
