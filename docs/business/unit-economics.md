@@ -1,4 +1,4 @@
-# KrattOS — Unit Economics
+# KrattOS: Unit Economics
 
 Two revenue streams: the appliance (one-time) and the seed-pod
 subscription (recurring). All figures USD.
@@ -16,11 +16,11 @@ subscription (recurring). All figures USD.
 | **Gross margin per unit**    | **$1,066** | **$2,311** |
 | **Gross margin %**           | **24%** | **51%** |
 
-> The single-build margin is intentionally thin — early units exist to
+> The single-build margin is intentionally thin, early units exist to
 > generate proof, not profit. At-scale margins justify the CapEx for
 > tooling.
 
-## Recurring revenue — seed-pod subscription
+## Recurring revenue: seed-pod subscription
 
 A monthly mail-out: 4 seed-pods (one per shelf) + nutrient refill +
 optional new recipe YAML on the USB stick. No internet required for
@@ -42,7 +42,7 @@ Assumed lifetime: **5 years** (consumer) / **7 years** (B2B).
 | Segment | Hardware GM | 5-yr subscription net | Total LTV |
 |---------|------------:|----------------------:|----------:|
 | Consumer (at scale) | $2,311 | $1,020 | **$3,331** |
-| B2B fleet (7yr, no subs — they buy nutrients bulk) | $1,800 | $0 | **$1,800 × N units** |
+| B2B fleet (7yr, no subs: they buy nutrients bulk) | $1,800 | $0 | **$1,800 × N units** |
 
 ## CAC targets
 
@@ -50,10 +50,10 @@ For a healthy 3:1 LTV:CAC ratio:
 
 - **Consumer:** CAC ≤ $1,100. Achievable through restaurant-chef
   influencer placements, food-bloggers, and Crowd Supply launch.
-- **B2B:** CAC ≤ $600 per unit (typically $2k–$4k per *deal*, which
-  covers a 4–8-unit install).
+- **B2B:** CAC ≤ $600 per unit (typically $2k to $4k per *deal*, which
+  covers a 4 to 8-unit install).
 
-## Sensitivity table — what kills the model
+## Sensitivity table: what kills the model
 
 | Risk | Impact | Mitigation |
 |------|-------:|------------|
@@ -76,14 +76,14 @@ For a healthy 3:1 LTV:CAC ratio:
 | Marketing + Crowd Supply launch | $55,000 |
 | **Total ask** | **$600,000** |
 
-A $600k–$750k pre-seed at a $4M–$5M post-money cap is a reasonable
+A $600k to $750k pre-seed at a $4M to $5M post-money cap is a reasonable
 ask given the prototype + LOIs milestone.
 
 ## SBIR alignment
 
-- **USDA SBIR Phase I:** $175k, food-systems topic — the air-gap +
+- **USDA SBIR Phase I:** $175k, food-systems topic, the air-gap +
   local-food angle qualifies cleanly.
-- **NSF SBIR Phase I:** $275k, on-device AI / edge ML — the ONNX-on-
+- **NSF SBIR Phase I:** $275k, on-device AI / edge ML, the ONNX-on-
   Jetson story is the pitch.
 
 Both are non-dilutive. Win one and the dilutive raise drops to $400k.

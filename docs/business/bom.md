@@ -1,7 +1,7 @@
-# KrattOS v1 — Bill of Materials
+# KrattOS v1: Bill of Materials
 
 Single-rack home appliance. Quantities for ONE unit. Prices are
-ballpark single-unit retail in USD (Q4 2025) — at-scale pricing in the
+ballpark single-unit retail in USD (Q4 2025), at-scale pricing in the
 right column is what the unit-economics model uses, assuming 1k-unit
 manufacturing runs through a contract manufacturer.
 
@@ -31,7 +31,7 @@ Cabinet size and component placements are anchored in
 | 4 | Capacitive soil moisture probe (food-grade) | $12 | $5 |
 | 1 | Atlas EC probe (manifold) | $69 | $42 |
 | 1 | Atlas pH probe (manifold) | $59 | $36 |
-| 1 | Flow meter, 0.5–10 L/min | $24 | $13 |
+| 1 | Flow meter, 0.5 to 10 L/min | $24 | $13 |
 | 1 | NTC thermistor in slurry tank | $4 | $1.50 |
 | 1 | Leak sensor (drip-pan) | $11 | $4 |
 | **Subtotal** | | **$248** | **$152** |
@@ -112,10 +112,10 @@ Cabinet size and component placements are anchored in
 
 - These prices assume off-the-shelf parts. Custom-injected plastic
   tanks and a tooled grinder cut ~$120 at 5k+ qty but require $40k+ in
-  tooling — out of scope until Series A.
+  tooling, out of scope until Series A.
 - Atlas probes are the single biggest cost in the sensor stack. At
   10k+ volume, in-house EC/pH conditioning circuits drop that to ~$25.
 - Jetson Orin Nano can be replaced with a Jetson Nano (older) at $149
   if recipe-engine and ai-planner are rewritten to drop ONNX TensorRT.
   Trade-off: 4× slower inference, plant phase detection moves from
-  8ms to ~35ms — still well within the 30s control tick.
+  8ms to ~35ms, still well within the 30s control tick.

@@ -1,4 +1,4 @@
-# KrattOS — Campaign Image Prompts
+# KrattOS: Campaign Image Prompts
 
 Copy-paste these into ChatGPT (or any image model). All three share
 the visual DNA of the hero image: solarpunk kitchen, fridge-sized
@@ -7,7 +7,7 @@ door, composter at base, brass plumbing, art-nouveau kitchen with
 golden-hour light. The wordmark "KrattOS" appears on the brass
 nameplate at the top of the door.
 
-For every render: generate 3–4 takes and pick the one where the
+For every render: generate 3 to 4 takes and pick the one where the
 **KrattOS** wordmark is spelled cleanly. If it garbles, regenerate
 with "redraw with the KrattOS wordmark spelled correctly and no
 other text."
@@ -81,8 +81,8 @@ THE SCENE:
   glass door.
 - The glass door is OPEN, swung to the left, revealing the four
   glowing shelves of fresh produce inside in full detail.
-- A pair of human hands — relaxed, mid-30s, no rings, slightly soil-
-  marked — reaches into the second shelf from the top and gently
+- A pair of human hands: relaxed, mid-30s, no rings, slightly soil-
+  marked, reaches into the second shelf from the top and gently
   cradles a head of mature buttercrunch lettuce, about to lift it
   free of the tray. A small wooden harvest basket sits on the
   counter nearby, already holding a bunch of basil.
@@ -92,7 +92,7 @@ DETAILS:
   light wash on the hands and on the lettuce. Tiny food-grade
   silicone tubes visible feeding each tray.
 - The composter at the base is partly visible behind the lower
-  shelf — it tells the story that scraps will go in as the lettuce
+  shelf, it tells the story that scraps will go in as the lettuce
   comes out.
 
 BRANDING:
@@ -124,14 +124,14 @@ that turns interested readers into donors.
 ## C. Schematic-style cutaway for the *how it works* section
 
 Use this when you want to *explain* the appliance instead of sell it.
-Less photoreal, more elegant editorial illustration — like a
+Less photoreal, more elegant editorial illustration, like a
 *Popular Science* or *Apartment Therapy* infographic.
 
 ```
 Create a clean, elegant editorial cutaway illustration of a fridge-
 sized indoor vertical-farming appliance. The style is a mix of
 mid-century technical-manual line work and modern solarpunk
-infographic — soft warm palette, gentle shading, hand-rendered
+infographic, soft warm palette, gentle shading, hand-rendered
 quality. Not photorealistic. 16:9 landscape.
 
 LAYOUT:
@@ -144,26 +144,26 @@ LAYOUT:
 
 INTERIOR (labelled):
 Show and label, in elegant editorial typography:
-- "Camera" — small pan/tilt camera on the upper-left interior wall
+- "Camera", small pan/tilt camera on the upper-left interior wall
   watching the shelves
-- "Edge-AI brain" — a small Jetson-style board mounted to the back
+- "Edge-AI brain", a small Jetson-style board mounted to the back
   wall behind the top shelf
-- "LED grow panel" — a glowing horizontal panel under each shelf
-- "Growing tray" — four labelled stacked trays with plants at
+- "LED grow panel", a glowing horizontal panel under each shelf
+- "Growing tray", four labelled stacked trays with plants at
   visibly different growth stages (microgreens → seedlings →
   mature lettuce → mizuna)
-- "Moisture probe" — a slender probe in one tray with a tiny
+- "Moisture probe", a slender probe in one tray with a tiny
   call-out
-- "Fan" — circular fan icon at the back of one shelf
-- "Nutrient slurry tubing" — thin brass-coloured pipes running
+- "Fan", circular fan icon at the back of one shelf
+- "Nutrient slurry tubing", thin brass-coloured pipes running
   from the composter at the base up to each shelf
-- "Composter" — the unit at the base, labelled, with a small
+- "Composter", the unit at the base, labelled, with a small
   arrow showing kitchen scraps going in
-- "Slurry tank" — adjacent tank with level indicator
-- "Safety contactor" — small box at the bottom-right with an
+- "Slurry tank", adjacent tank with level indicator
+- "Safety contactor", small box at the bottom-right with an
   obvious heavy cable to the appliance
-- "E-stop" — the red latching button on the front panel
-- "Air-gap (no internet)" — annotated with a small Wi-Fi symbol
+- "E-stop", the red latching button on the front panel
+- "Air-gap (no internet)", annotated with a small Wi-Fi symbol
   CROSSED OUT, sitting where a network port would be
 
 BRANDING:
@@ -199,9 +199,9 @@ For each prompt:
 3. Check the cabinet proportions roughly match the others. Hero,
    square, and open-door shots should look like the *same* product.
 4. Crop and export at:
-   - **A (square)** — 1080×1080 for IG / 1200×1200 for GoFundMe card
-   - **B (open door)** — 1920×1080 for the GFM story body
-   - **C (cutaway)** — 1920×1080 for the GFM story body and 1600×900
+   - **A (square)**: 1080×1080 for IG / 1200×1200 for GoFundMe card
+   - **B (open door)**: 1920×1080 for the GFM story body
+   - **C (cutaway)**: 1920×1080 for the GFM story body and 1600×900
      for the pitch deck
 
 Save all three under `assets/marketing/` once you've picked the
