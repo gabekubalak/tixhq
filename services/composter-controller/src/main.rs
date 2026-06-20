@@ -139,7 +139,7 @@ async fn main() -> Result<()> {
 
     // Subscriber: latest temperature feeds the state machine.
     let batch_t = batch.clone();
-    let mut sub = client.subscribe("grove.composter.sensor.*").await?;
+    let mut sub = client.subscribe("kratt.composter.sensor.*").await?;
     tokio::spawn(async move {
         while let Some(msg) = sub.next().await {
             let Ok(m) = serde_json::from_slice::<CompostSensor>(&msg.payload) else { continue };
@@ -151,7 +151,7 @@ async fn main() -> Result<()> {
 
     // Subscriber: operator commands (start a batch / dispense slurry).
     let batch_c = batch.clone();
-    let mut sub_cmd = client.subscribe("grove.composter.command").await?;
+    let mut sub_cmd = client.subscribe("kratt.composter.command").await?;
     tokio::spawn(async move {
         while let Some(msg) = sub_cmd.next().await {
             let Ok(c) = serde_json::from_slice::<CompostCommand>(&msg.payload) else { continue };
@@ -197,7 +197,7 @@ async fn main() -> Result<()> {
             (serde_json::to_vec(&msg)?, b.phase)
         };
         client
-            .publish("grove.composter.state", snapshot_bytes.into())
+            .publish("kratt.composter.state", snapshot_bytes.into())
             .await?;
     }
 }

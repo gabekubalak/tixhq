@@ -27,7 +27,7 @@ async def watch(nats: NATS, deadline: float) -> int:
         nonlocal trip_count
         trip_count += 1
 
-    await nats.subscribe("grove.event.safety.trip", cb=lambda m: asyncio.create_task(on_trip(m)))
+    await nats.subscribe("kratt.event.safety.trip", cb=lambda m: asyncio.create_task(on_trip(m)))
 
     while time.time() < deadline:
         await asyncio.sleep(60)

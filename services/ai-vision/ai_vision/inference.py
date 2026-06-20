@@ -2,9 +2,9 @@
 
 Pan/tilts the camera through every shelf every VISION_PERIOD_S, captures a
 frame, runs leaf segmentation (UNet) and classification (MobileNetV3-Small),
-and publishes a grove.vision.observation message per shelf.
+and publishes a kratt.vision.observation message per shelf.
 
-Models are loaded from /opt/grove/models and shipped via the update-manager;
+Models are loaded from /opt/kratt/models and shipped via the update-manager;
 this service never downloads anything.
 """
 
@@ -25,9 +25,9 @@ from nats.aio.client import Client as NATS
 
 log = logging.getLogger("ai-vision")
 
-MODELS_DIR = Path(os.environ.get("GROVE_MODELS", "/opt/grove/models"))
+MODELS_DIR = Path(os.environ.get("KRATT_MODELS", "/opt/kratt/models"))
 VISION_PERIOD_S = 15 * 60
-CAMERA_DEV = "/dev/grove-cam"
+CAMERA_DEV = "/dev/kratt-cam"
 PHASE_CLASSES = ["germination", "seedling", "veg_early", "veg_late", "flower", "harvest_ready"]
 
 
@@ -115,7 +115,7 @@ async def amain() -> None:
                 "model_version": model_version,
             }
             await nats.publish(
-                f"grove.vision.observation.{s.shelf_id}",
+                f"kratt.vision.observation.{s.shelf_id}",
                 json.dumps(msg).encode(),
             )
         await asyncio.sleep(VISION_PERIOD_S)

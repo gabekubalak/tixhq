@@ -1,4 +1,4 @@
-# GroveOS — Fundraising Roadmap
+# KrattOS — Fundraising Roadmap
 
 The shortest path from "working software repo" to "funded hardware
 company." Read top-to-bottom; don't skip phases.
@@ -38,7 +38,7 @@ Pick ONE primary channel; don't try to be all three at once.
 | **Software + reference design** | DIY/integrators build the box | Low | 3–6 mo |
 | **B2B SaaS-on-appliance** | Commercial farms (fleet mgmt) | Medium | 6–9 mo |
 
-**Recommendation for GroveOS:** Hardware appliance, beachhead = single-
+**Recommendation for KrattOS:** Hardware appliance, beachhead = single-
 location restaurants and K-12 culinary programs in the US Northeast +
 Pacific Northwest. The air-gap angle differentiates from Click & Grow
 (consumer toy) and Farmshelf (connected, B2B, expensive).
@@ -103,7 +103,7 @@ These live in this repo:
 
 ### Days 1–30
 - Order Jetson Orin Nano dev kit + 3 ESP32-S3 + Atlas probe kit + 4-shelf rack
-- Flash GroveOS, wire up first shelf, get one moisture probe → dashboard
+- Flash KrattOS, wire up first shelf, get one moisture probe → dashboard
 - File USPTO provisional patent on composter→slurry→shelf loop ($320)
 - Open conversations with 20 restaurants in your city; book 10 site visits
 

@@ -1,17 +1,17 @@
 [Unit]
-Description=VictoriaMetrics single-node (GroveOS sensor telemetry)
+Description=VictoriaMetrics single-node (KrattOS sensor telemetry)
 Documentation=https://docs.victoriametrics.com/
-PartOf=grove.target
-Before=grove-sensor-ingest.service grove-timeseries.service
+PartOf=kratt.target
+Before=kratt-sensor-ingest.service kratt-timeseries.service
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=grove
-Group=grove
+User=kratt
+Group=kratt
 ExecStart=/usr/local/bin/victoria-metrics-prod \
-  -storageDataPath=/var/lib/grove/tsdb \
+  -storageDataPath=/var/lib/kratt/tsdb \
   -retentionPeriod=14d \
   -downsampling.period=1m:0s \
   -httpListenAddr=127.0.0.1:8428 \
@@ -26,9 +26,9 @@ OOMPolicy=continue
 
 # Hardening
 ProtectSystem=strict
-ReadWritePaths=/var/lib/grove/tsdb
+ReadWritePaths=/var/lib/kratt/tsdb
 PrivateTmp=true
 NoNewPrivileges=true
 
 [Install]
-WantedBy=grove.target
+WantedBy=kratt.target

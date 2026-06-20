@@ -4,7 +4,7 @@
 //! parallel watcher that:
 //!   - Subscribes to manifold + composter telemetry on the bus.
 //!   - Independently checks the same bounds the MCU checks.
-//!   - Publishes grove.event.safety.trip so the UI / alerting / planner all
+//!   - Publishes kratt.event.safety.trip so the UI / alerting / planner all
 //!     see the trip immediately.
 //!   - Pings systemd's hardware watchdog so the Jetson reboots if this
 //!     service deadlocks.
@@ -62,7 +62,7 @@ async fn publish_trip(client: &Client, cause: &str) -> Result<()> {
         "requires_ack": true,
     });
     client
-        .publish("grove.event.safety.trip", serde_json::to_vec(&body)?.into())
+        .publish("kratt.event.safety.trip", serde_json::to_vec(&body)?.into())
         .await?;
     error!(cause, "safety trip");
     Ok(())
@@ -78,7 +78,7 @@ async fn main() -> Result<()> {
     // Manifold task: trips on EC/pH bounds.
     let watch_m = watch.clone();
     let client_m = client.clone();
-    let mut sub_manifold = client.subscribe("grove.manifold.sensor.*").await?;
+    let mut sub_manifold = client.subscribe("kratt.manifold.sensor.*").await?;
     tokio::spawn(async move {
         while let Some(msg) = sub_manifold.next().await {
             let Ok(m) = serde_json::from_slice::<Sample>(&msg.payload) else { continue };
@@ -109,7 +109,7 @@ async fn main() -> Result<()> {
     // Composter task: trips on over-temperature.
     let watch_c = watch.clone();
     let client_c = client.clone();
-    let mut sub_compost = client.subscribe("grove.composter.sensor.*").await?;
+    let mut sub_compost = client.subscribe("kratt.composter.sensor.*").await?;
     tokio::spawn(async move {
         while let Some(msg) = sub_compost.next().await {
             let Ok(m) = serde_json::from_slice::<Sample>(&msg.payload) else { continue };

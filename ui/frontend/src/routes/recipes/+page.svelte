@@ -61,7 +61,7 @@
   onMount(() => { refresh(); });
 </script>
 
-<h1>GroveOS — Recipes</h1>
+<h1>KrattOS — Recipes</h1>
 <nav class="views">
   <a href="/">← Dashboard</a>
   <a href="/safety">Safety</a>

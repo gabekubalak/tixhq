@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     let client = async_nats::connect("127.0.0.1:4222").await?;
     let state = Arc::new(Mutex::new(State::default()));
 
-    let mut manifold = client.subscribe("grove.manifold.sensor.*").await?;
+    let mut manifold = client.subscribe("kratt.manifold.sensor.*").await?;
     let s1 = state.clone();
     tokio::spawn(async move {
         while let Some(msg) = manifold.next().await {
@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
         }
     });
 
-    let mut compost = client.subscribe("grove.composter.sensor.*").await?;
+    let mut compost = client.subscribe("kratt.composter.sensor.*").await?;
     let s2 = state.clone();
     tokio::spawn(async move {
         while let Some(msg) = compost.next().await {
@@ -80,7 +80,7 @@ async fn main() -> Result<()> {
         }
     });
 
-    let mut setpoints = client.subscribe("grove.planner.setpoint.*").await?;
+    let mut setpoints = client.subscribe("kratt.planner.setpoint.*").await?;
     let s3 = state.clone();
     tokio::spawn(async move {
         while let Some(msg) = setpoints.next().await {
@@ -113,7 +113,7 @@ async fn main() -> Result<()> {
             reason: "ec_below_setpoint",
             correlation_id: uuid::Uuid::new_v4().to_string(),
         };
-        client.publish("grove.command.dose",
+        client.publish("kratt.command.dose",
             serde_json::to_vec(&cmd)?.into()).await?;
         info!(pump = cmd.pump_id, ml = cmd.volume_ml, "dose issued");
     }

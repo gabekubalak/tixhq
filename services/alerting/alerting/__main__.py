@@ -1,6 +1,6 @@
 """Alert fan-out.
 
-Subscribes to grove.event.alert.* and grove.event.safety.trip and:
+Subscribes to kratt.event.alert.* and kratt.event.safety.trip and:
   - Pushes a buzzer + LCD command frame to the sensor MCU.
   - Publishes a JSON message on a LAN-local mDNS-advertised service so
     companion tablets on the same subnet receive a notification.
@@ -26,12 +26,12 @@ def _advertise_companion() -> Zeroconf:
     zc = Zeroconf()
     ip = socket.gethostbyname(socket.gethostname())
     info = ServiceInfo(
-        "_grove-alerts._tcp.local.",
-        "grove-alerts._grove-alerts._tcp.local.",
+        "_kratt-alerts._tcp.local.",
+        "kratt-alerts._kratt-alerts._tcp.local.",
         addresses=[socket.inet_aton(ip)],
         port=COMPANION_PORT,
         properties={"version": "1"},
-        server="grove.local.",
+        server="kratt.local.",
     )
     zc.register_service(info)
     return zc
@@ -39,7 +39,7 @@ def _advertise_companion() -> Zeroconf:
 
 async def _broadcast(server: asyncio.AbstractServer, msg: bytes) -> None:
     # All connected companions get the same frame.
-    for w in getattr(server, "_grove_clients", []):
+    for w in getattr(server, "_kratt_clients", []):
         try:
             w.write(msg + b"\n")
             await w.drain()
@@ -49,11 +49,11 @@ async def _broadcast(server: asyncio.AbstractServer, msg: bytes) -> None:
 
 async def _handle_companion(reader, writer):
     server = writer.get_extra_info("server")
-    server._grove_clients = getattr(server, "_grove_clients", []) + [writer]
+    server._kratt_clients = getattr(server, "_kratt_clients", []) + [writer]
     try:
         await reader.read()
     finally:
-        server._grove_clients.remove(writer)
+        server._kratt_clients.remove(writer)
         writer.close()
 
 
@@ -63,21 +63,21 @@ async def amain() -> None:
     await nats.connect(os.environ.get("NATS_URL", "nats://127.0.0.1:4222"))
     _advertise_companion()
     server = await asyncio.start_server(_handle_companion, "0.0.0.0", COMPANION_PORT)
-    server._grove_clients = []
+    server._kratt_clients = []
 
     async def on_alert(msg):
         data = json.loads(msg.data)
         severity = data.get("severity", "info")
         log.info("[%s] %s", severity.upper(), data.get("message"))
         # Buzzer/LCD: small "frame me" payload routed to the sensor MCU by control-loop
-        await nats.publish("grove.command.buzzer", json.dumps({
+        await nats.publish("kratt.command.buzzer", json.dumps({
             "pattern": "tri" if severity == "critical" else "single",
             "message": data.get("message", "")[:80],
         }).encode())
         await _broadcast(server, msg.data)
 
-    await nats.subscribe("grove.event.alert.*", cb=lambda m: asyncio.create_task(on_alert(m)))
-    await nats.subscribe("grove.event.safety.trip", cb=lambda m: asyncio.create_task(on_alert(m)))
+    await nats.subscribe("kratt.event.alert.*", cb=lambda m: asyncio.create_task(on_alert(m)))
+    await nats.subscribe("kratt.event.safety.trip", cb=lambda m: asyncio.create_task(on_alert(m)))
 
     async with server:
         await server.serve_forever()

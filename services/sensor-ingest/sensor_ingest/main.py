@@ -1,6 +1,6 @@
 """Read framed MCU traffic, normalize, publish to NATS, write to TSDB.
 
-Each `/dev/grove-*-mcu` symlink (see infra/udev/99-grove.rules) has its own
+Each `/dev/kratt-*-mcu` symlink (see infra/udev/99-kratt.rules) has its own
 reader task. A bad CRC increments a counter; sustained CRC failures escalate
 to a safety alert.
 """
@@ -73,7 +73,7 @@ class MCUReader(asyncio.Protocol):
                 "message": f"{self.dev}: {len(self.crc_errors)} CRC errors / 60s: {why}",
             }
             asyncio.create_task(
-                self.nats.publish("grove.event.alert.critical", json.dumps(payload).encode())
+                self.nats.publish("kratt.event.alert.critical", json.dumps(payload).encode())
             )
 
 
@@ -99,9 +99,9 @@ async def amain() -> None:
     nats = NATS()
     await nats.connect(os.environ.get("NATS_URL", "nats://127.0.0.1:4222"))
     loop = asyncio.get_running_loop()
-    devs = sorted(glob.glob("/dev/grove-*-mcu*"))
+    devs = sorted(glob.glob("/dev/kratt-*-mcu*"))
     if not devs:
-        log.error("no /dev/grove-*-mcu* devices found")
+        log.error("no /dev/kratt-*-mcu* devices found")
         return
     await asyncio.gather(*(_attach(loop, nats, d) for d in devs))
     while True:

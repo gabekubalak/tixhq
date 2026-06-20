@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.vision.observation",
+  "$id": "kratt.vision.observation",
   "title": "Per-shelf vision inference result",
   "type": "object",
   "required": ["ts", "shelf_id", "phase_estimate", "leaf_area_cm2", "color_health", "model_version"],

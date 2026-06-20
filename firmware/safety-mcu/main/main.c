@@ -41,7 +41,7 @@ static void trip(const char *cause) {
     gpio_set_level(GPIO_CONTACTOR_RELAY, 0);   /* open = de-energize */
     latched = true;
     ESP_LOGE(TAG, "TRIP: %s", cause);
-    /* The Jetson-side mirror publishes grove.event.safety.trip on the bus. */
+    /* The Jetson-side mirror publishes kratt.event.safety.trip on the bus. */
 }
 
 static void safety_task(void *arg) {

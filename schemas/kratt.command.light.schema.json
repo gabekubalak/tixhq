@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.command.light",
+  "$id": "kratt.command.light",
   "title": "Per-shelf LED panel command",
   "type": "object",
   "required": ["ts", "shelf_id", "dim_pct"],

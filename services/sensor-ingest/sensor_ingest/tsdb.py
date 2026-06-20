@@ -28,13 +28,13 @@ def _to_prom_line(reading: dict[str, Any]) -> str:
     """Convert a sensor reading dict to a Prometheus exposition line.
 
     Format:
-        grove_sensor{shelf_id="<id>",kind="<kind>"} <value> <timestamp_ms>
+        kratt_sensor{shelf_id="<id>",kind="<kind>"} <value> <timestamp_ms>
     """
     ts_ms = int(float(reading["ts"]) * 1000)
     shelf_id = reading["shelf_id"]
     kind = reading["kind"]
     value = reading["value"]
-    return f'grove_sensor{{shelf_id="{shelf_id}",kind="{kind}"}} {value} {ts_ms}'
+    return f'kratt_sensor{{shelf_id="{shelf_id}",kind="{kind}"}} {value} {ts_ms}'
 
 
 class TSDBWriter:

@@ -1,0 +1,15 @@
+[Unit]
+Description=KrattOS vision inference
+PartOf=kratt.target
+After=kratt-recipe.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/usr/bin/python3 -m ai_vision
+WorkingDirectory=/opt/kratt/services/ai-vision
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=kratt.target

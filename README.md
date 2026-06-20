@@ -1,4 +1,4 @@
-# GroveOS
+# KrattOS
 
 Operating system for a closed-loop, vertically stacked indoor growing appliance.
 Air-gapped local AI controls light, water, nutrients, and pH. An on-board
@@ -56,7 +56,7 @@ Two compute tiers talk over USB-CDC (COBS + CRC-16 framing):
 ## Air-gap discipline
 
 - WiFi/BT disabled in MCU firmware.
-- `infra/firewall/nftables-grove.conf` blocks all outbound traffic on the
+- `infra/firewall/nftables-kratt.conf` blocks all outbound traffic on the
   Jetson except mDNS/LAN.
 - Updates ship as `minisign`-verified tar bundles, applied via A/B partition
   swap with health-check rollback.

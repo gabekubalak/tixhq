@@ -1,0 +1,16 @@
+[Unit]
+Description=KrattOS safety supervisor (Jetson-side mirror)
+PartOf=kratt.target
+After=kratt-bus.service kratt-sensor-ingest.service
+Requires=kratt-bus.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/opt/kratt/bin/safety-watcher
+Restart=always
+RestartSec=1
+WatchdogSec=5
+
+[Install]
+WantedBy=kratt.target

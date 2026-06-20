@@ -60,6 +60,6 @@
       "sha256": "placeholder-train-and-fill"
     }
   ],
-  "install_path": "/opt/grove/models",
+  "install_path": "/opt/kratt/models",
   "note": "Actual model files (.onnx, .txt) are not committed to this repo. They ship via signed update bundles."
 }

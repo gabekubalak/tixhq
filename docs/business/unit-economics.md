@@ -1,4 +1,4 @@
-# GroveOS — Unit Economics
+# KrattOS — Unit Economics
 
 Two revenue streams: the appliance (one-time) and the seed-pod
 subscription (recurring). All figures USD.

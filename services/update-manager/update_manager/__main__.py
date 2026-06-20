@@ -21,14 +21,14 @@ from pathlib import Path
 
 import click
 
-GROVE_PUBKEY = Path("/etc/grove/minisign.pub")
-INSTALL_ROOT = Path("/opt/grove")
+KRATT_PUBKEY = Path("/etc/kratt/minisign.pub")
+INSTALL_ROOT = Path("/opt/kratt")
 INACTIVE_SLOT = Path("/dev/mmcblk0p3")  # bootloader chooses, this is a placeholder
 
 
 def _verify_signature(bundle: Path, signature: Path) -> None:
     subprocess.run(
-        ["minisign", "-V", "-p", str(GROVE_PUBKEY), "-m", str(bundle), "-x", str(signature)],
+        ["minisign", "-V", "-p", str(KRATT_PUBKEY), "-m", str(bundle), "-x", str(signature)],
         check=True,
     )
 
@@ -54,9 +54,9 @@ def apply(bundle: Path, signature: Path) -> None:
         with tarfile.open(bundle) as tar:
             tar.extractall(out)
         manifest = _verify_manifest(out)
-        click.echo(f"Applying GroveOS update {manifest['version']}")
+        click.echo(f"Applying KrattOS update {manifest['version']}")
         # rootfs: dd to inactive slot, switch boot pointer, reboot
-        # models: copy to /opt/grove/models
+        # models: copy to /opt/kratt/models
         # firmware: flash via USB-CDC bootloader (delegated to flash-mcu helper)
         models = out / "models"
         if models.exists():

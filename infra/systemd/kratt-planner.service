@@ -1,0 +1,15 @@
+[Unit]
+Description=KrattOS AI planner
+PartOf=kratt.target
+After=kratt-vision.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/usr/bin/python3 -m ai_planner
+WorkingDirectory=/opt/kratt/services/ai-planner
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=kratt.target

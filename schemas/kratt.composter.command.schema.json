@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.composter.command",
+  "$id": "kratt.composter.command",
   "title": "Composter operator command",
   "type": "object",
   "required": ["ts", "action"],

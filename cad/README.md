@@ -1,7 +1,7 @@
-# cad/ — physical dimensions of the GroveOS appliance
+# cad/ — physical dimensions of the KrattOS appliance
 
 This directory is the **single source of truth** for the geometry of the
-GroveOS v1 appliance. The 3D twin in the web UI builds itself from
+KrattOS v1 appliance. The 3D twin in the web UI builds itself from
 `dimensions.yaml` at runtime; there is no hand-modelled `.blend` or `.glb`
 to keep in sync.
 
@@ -53,7 +53,7 @@ and `cd ui/frontend && npm run dev`):
    rises, then reset and drift again as the simulator dries it out.
 4. Hover a part — a tooltip shows its `partId`. Click to pin.
 5. Publish a fake safety trip:
-   `nats pub grove.event.safety.trip '{"ts":"2026-05-19T00:00:00Z","cause":"leak_pan","actuator_rail":"OFF","latched":true,"requires_ack":true}'` —
+   `nats pub kratt.event.safety.trip '{"ts":"2026-05-19T00:00:00Z","cause":"leak_pan","actuator_rail":"OFF","latched":true,"requires_ack":true}'` —
    the E-stop cap should turn vivid red.
 6. Navigate to `/3d/arch` — services laid out in tiers, NATS subjects
    drawn as coloured tubes; hover any tube to see the subject name.

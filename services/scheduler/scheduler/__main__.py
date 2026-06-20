@@ -2,7 +2,7 @@
 
 Subscribes to recipe setpoints; when `hours_on` changes for a shelf, computes
 the on/off transitions for that 24-hour window and publishes
-grove.command.light at each transition. Recirculation pump runs on a 15-min
+kratt.command.light at each transition. Recirculation pump runs on a 15-min
 on / 45-min off duty cycle during light-on hours.
 """
 
@@ -68,7 +68,7 @@ async def _run_shelf(nats: NATS, shelf_id: int, sp: dict) -> None:
             "dim_pct": 100.0 if on else 0.0,
             "ppfd_target": sp.get("ppfd", 0) if on else 0,
         }).encode()
-        await nats.publish("grove.command.light", msg)
+        await nats.publish("kratt.command.light", msg)
         await asyncio.sleep(wait + 1.0)
 
 
@@ -100,7 +100,7 @@ async def _run_pump(nats: NATS, shelves: dict[int, dict]) -> None:
                 "valve_id": "recirc",
                 "open": pump_on,
             }).encode()
-            await nats.publish("grove.command.valve", msg)
+            await nats.publish("kratt.command.valve", msg)
             log.info("recirc pump %s", "ON" if pump_on else "OFF")
             last_cmd = pump_on
 
@@ -128,7 +128,7 @@ async def amain() -> None:
             pump_task = asyncio.create_task(_run_pump(nats, shelves))
 
     await nats.subscribe(
-        "grove.planner.setpoint.*",
+        "kratt.planner.setpoint.*",
         cb=lambda m: asyncio.create_task(on_setpoint(m)),
     )
     while True:

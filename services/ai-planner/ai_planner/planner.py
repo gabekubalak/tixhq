@@ -28,7 +28,7 @@ from nats.aio.client import Client as NATS
 
 log = logging.getLogger("ai-planner")
 
-MODEL_PATH = Path("/opt/grove/models/ec-drift-lgbm-v0.1.txt")
+MODEL_PATH = Path("/opt/kratt/models/ec-drift-lgbm-v0.1.txt")
 SLURRY_EC_MIN = 1.5      # mS/cm threshold below which slurry isn't useful alone
 EC_DEADBAND = 0.15
 PH_DEADBAND = 0.15
@@ -109,14 +109,14 @@ async def amain() -> None:
             for z in zones.values():
                 z.slurry_ec = m["value"]
 
-    await nats.subscribe("grove.planner.setpoint.*", cb=lambda m: asyncio.create_task(on_setpoint(m)))
-    await nats.subscribe("grove.manifold.sensor.*",  cb=lambda m: asyncio.create_task(on_manifold(m)))
-    await nats.subscribe("grove.composter.sensor.*", cb=lambda m: asyncio.create_task(on_composter(m)))
+    await nats.subscribe("kratt.planner.setpoint.*", cb=lambda m: asyncio.create_task(on_setpoint(m)))
+    await nats.subscribe("kratt.manifold.sensor.*",  cb=lambda m: asyncio.create_task(on_manifold(m)))
+    await nats.subscribe("kratt.composter.sensor.*", cb=lambda m: asyncio.create_task(on_composter(m)))
 
     while True:
         for z in zones.values():
             for dose in _decide(z):
-                await nats.publish("grove.command.dose", dose)
+                await nats.publish("kratt.command.dose", dose)
         await asyncio.sleep(30.0)
 
 

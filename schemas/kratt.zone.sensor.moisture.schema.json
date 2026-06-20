@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.zone.sensor.moisture",
+  "$id": "kratt.zone.sensor.moisture",
   "title": "Per-shelf substrate moisture reading",
   "type": "object",
   "required": ["ts", "shelf_id", "probe_id", "value_pct"],

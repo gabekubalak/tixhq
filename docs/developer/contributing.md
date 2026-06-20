@@ -65,7 +65,7 @@ Add tests for any new decision logic. The verify pipeline must stay green.
 
 Every NATS message has a corresponding schema in `schemas/*.json`.
 When adding a new message type:
-1. Create `schemas/grove.<namespace>.<type>.schema.json`
+1. Create `schemas/kratt.<namespace>.<type>.schema.json`
 2. `scripts/validate_schemas.py` picks it up automatically
 3. Reference it in services that publish/subscribe
 

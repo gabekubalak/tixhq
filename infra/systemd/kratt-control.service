@@ -1,0 +1,15 @@
+[Unit]
+Description=KrattOS per-zone control loops
+PartOf=kratt.target
+After=kratt-safety.service
+Requires=kratt-bus.service kratt-safety.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/opt/kratt/bin/control-loop
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=kratt.target

@@ -161,11 +161,11 @@
   });
 </script>
 
-<svelte:head><title>GroveOS · 3D twin</title></svelte:head>
+<svelte:head><title>KrattOS · 3D twin</title></svelte:head>
 
 <div class="bar">
   <a href="/">← Dashboard</a>
-  <h1>GroveOS · 3D twin</h1>
+  <h1>KrattOS · 3D twin</h1>
   <a href="/3d/arch">Architecture →</a>
   <button on:click={toggleDoor}>{doorOpen ? "Close door" : "Open door"}</button>
 </div>

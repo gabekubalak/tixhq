@@ -92,7 +92,7 @@ async fn main() -> Result<()> {
 
     // Setpoint subscriber.
     let zones_sp = zones.clone();
-    let mut sp_sub = client.subscribe("grove.planner.setpoint.*").await?;
+    let mut sp_sub = client.subscribe("kratt.planner.setpoint.*").await?;
     tokio::spawn(async move {
         while let Some(msg) = sp_sub.next().await {
             let Ok(sp) = serde_json::from_slice::<Setpoint>(&msg.payload) else { continue };
@@ -104,7 +104,7 @@ async fn main() -> Result<()> {
 
     // Moisture subscriber.
     let zones_m = zones.clone();
-    let mut moist_sub = client.subscribe("grove.zone.*.sensor.moisture").await?;
+    let mut moist_sub = client.subscribe("kratt.zone.*.sensor.moisture").await?;
     tokio::spawn(async move {
         while let Some(msg) = moist_sub.next().await {
             let Ok(m) = serde_json::from_slice::<MoistureMsg>(&msg.payload) else { continue };
@@ -150,7 +150,7 @@ async fn main() -> Result<()> {
         for cmd in commands {
             let bytes = serde_json::to_vec(&cmd)?;
             client
-                .publish("grove.command.valve", bytes.into())
+                .publish("kratt.command.valve", bytes.into())
                 .await?;
             info!(valve = cmd.valve_id, ms = cmd.duration_ms, "moisture top-up");
         }

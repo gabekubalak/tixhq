@@ -47,7 +47,7 @@
   });
 </script>
 
-<h1>GroveOS — Safety</h1>
+<h1>KrattOS — Safety</h1>
 <nav class="views">
   <a href="/">← Dashboard</a>
   <a href="/recipes">Recipes</a>

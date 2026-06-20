@@ -1,0 +1,15 @@
+[Unit]
+Description=KrattOS local NATS bus
+PartOf=kratt.target
+Before=kratt-sensor-ingest.service kratt-safety.service kratt-control.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/usr/local/bin/nats-server -c /etc/kratt/nats-server.conf
+Restart=always
+RestartSec=2
+LimitNOFILE=65536
+
+[Install]
+WantedBy=kratt.target

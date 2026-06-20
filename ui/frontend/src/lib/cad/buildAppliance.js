@@ -94,7 +94,7 @@ function makeLcdTexture() {
   ctx.fillStyle = "#80ff9e";
   ctx.font = "bold 14px ui-monospace, monospace";
   ctx.textBaseline = "top";
-  ctx.fillText("GroveOS  v1", 8, 6);
+  ctx.fillText("KrattOS  v1", 8, 6);
   ctx.fillText("4 shelves  OK", 8, 22);
   ctx.fillText("compost: 58C", 8, 38);
   ctx.fillText("uptime: 12d", 8, 52);

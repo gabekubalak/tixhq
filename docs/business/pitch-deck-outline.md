@@ -1,4 +1,4 @@
-# GroveOS — Pitch Deck Outline
+# KrattOS — Pitch Deck Outline
 
 A 10-slide deck for pre-seed angels, agtech accelerators, and SBIR/STTR
 review panels. Each slide lists the *one* thing it must land. Total
@@ -7,7 +7,7 @@ read-aloud time ≈ 6 minutes.
 ---
 
 ## Slide 1 — Title
-- **Product:** GroveOS — the operating system for an AI vertical farm
+- **Product:** KrattOS — the operating system for an AI vertical farm
   that runs offline.
 - **Tagline (one line):** "Grocery-store produce, grown on your counter,
   with zero cloud."

@@ -38,12 +38,12 @@ def main(out: Path, days: int) -> None:
     start = end - dt.timedelta(days=days)
 
     metrics = [
-        "grove_zone_moisture_pct",
-        "grove_manifold_ec_ms_cm",
-        "grove_manifold_ph",
-        "grove_composter_temp_c",
-        "grove_vision_leaf_area_cm2",
-        "grove_vision_color_health",
+        "kratt_zone_moisture_pct",
+        "kratt_manifold_ec_ms_cm",
+        "kratt_manifold_ph",
+        "kratt_composter_temp_c",
+        "kratt_vision_leaf_area_cm2",
+        "kratt_vision_color_health",
     ]
 
     rows: list[dict] = []
@@ -60,7 +60,7 @@ def main(out: Path, days: int) -> None:
 
     table = pa.Table.from_pylist(rows)
     stamp = end.strftime("%Y%m%dT%H%M%SZ")
-    path = out / f"grove-export-{stamp}.parquet"
+    path = out / f"kratt-export-{stamp}.parquet"
     pq.write_table(table, path, compression="zstd")
     click.echo(f"Wrote {len(rows)} rows to {path}")
 

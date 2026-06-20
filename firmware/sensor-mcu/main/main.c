@@ -27,12 +27,12 @@ extern void actuators_handle_command(const uint8_t *json, size_t len);
 
 static void sample_task(void *arg) {
     char  json[1024];
-    uint8_t wire[GROVE_FRAME_MAX_WIRE];
+    uint8_t wire[KRATT_FRAME_MAX_WIRE];
     TickType_t last = xTaskGetTickCount();
 
     while (1) {
         sensors_sample(json, sizeof(json));
-        size_t n = grove_frame_pack((const uint8_t *)json, strlen(json),
+        size_t n = kratt_frame_pack((const uint8_t *)json, strlen(json),
                                     wire, sizeof(wire));
         if (n > 0) tinyusb_cdcacm_write_queue(TINYUSB_CDC_ACM_0, wire, n);
         tinyusb_cdcacm_write_flush(TINYUSB_CDC_ACM_0, 0);
@@ -42,7 +42,7 @@ static void sample_task(void *arg) {
 }
 
 static void cdc_rx_cb(int itf, cdcacm_event_t *event) {
-    static uint8_t  buf[GROVE_FRAME_MAX_WIRE];
+    static uint8_t  buf[KRATT_FRAME_MAX_WIRE];
     static size_t   idx = 0;
     uint8_t chunk[64];
     size_t  got = 0;
@@ -50,8 +50,8 @@ static void cdc_rx_cb(int itf, cdcacm_event_t *event) {
 
     for (size_t i = 0; i < got; i++) {
         if (chunk[i] == 0x00) {
-            uint8_t payload[GROVE_FRAME_MAX_PAYLOAD];
-            size_t  pl = grove_frame_unpack(buf, idx, payload, sizeof(payload));
+            uint8_t payload[KRATT_FRAME_MAX_PAYLOAD];
+            size_t  pl = kratt_frame_unpack(buf, idx, payload, sizeof(payload));
             if (pl != (size_t)-1) actuators_handle_command(payload, pl);
             else ESP_LOGW(TAG, "frame drop (crc/cobs)");
             idx = 0;

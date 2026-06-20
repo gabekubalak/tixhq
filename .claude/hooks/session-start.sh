@@ -1,5 +1,5 @@
 #!/bin/bash
-# GroveOS session-start hook.
+# KrattOS session-start hook.
 #
 # Runs in Claude Code on the web sessions only. Installs Python test deps,
 # pre-warms cargo's target/ cache, and exercises `make verify` so any

@@ -1,4 +1,4 @@
-# GroveOS Architecture
+# KrattOS Architecture
 
 ## Two-tier compute split
 
@@ -9,7 +9,7 @@
 
 **Cognitive tier (NVIDIA Jetson Orin Nano, Ubuntu 22.04 L4T)**
 - Vision inference, planning, control math, UI, storage, recipes
-- Supervised by systemd (`grove.target`)
+- Supervised by systemd (`kratt.target`)
 
 ## NATS bus
 
@@ -20,15 +20,15 @@ and command audit.
 ### Subject namespace
 
 ```
-grove.zone.{shelf_id}.sensor.{kind}   — per-shelf telemetry
-grove.manifold.sensor.{ec|ph|flow}    — shared manifold sensors
-grove.composter.state                 — composter FSM state
-grove.composter.sensor.{kind}         — composter probes
-grove.command.{dose|valve|light}      — actuator commands
-grove.event.alert.{severity}          — operator alerts
-grove.event.safety.trip               — safety latch events
-grove.vision.observation.{shelf_id}   — vision pipeline output
-grove.planner.setpoint.{shelf_id}     — recipe/planner setpoints
+kratt.zone.{shelf_id}.sensor.{kind}   — per-shelf telemetry
+kratt.manifold.sensor.{ec|ph|flow}    — shared manifold sensors
+kratt.composter.state                 — composter FSM state
+kratt.composter.sensor.{kind}         — composter probes
+kratt.command.{dose|valve|light}      — actuator commands
+kratt.event.alert.{severity}          — operator alerts
+kratt.event.safety.trip               — safety latch events
+kratt.vision.observation.{shelf_id}   — vision pipeline output
+kratt.planner.setpoint.{shelf_id}     — recipe/planner setpoints
 ```
 
 All messages are JSON validated against schemas in `schemas/*.json`.
@@ -38,19 +38,19 @@ All messages are JSON validated against schemas in `schemas/*.json`.
 Managed by systemd dependencies in `infra/systemd/`:
 
 ```
-grove-bus (NATS)
-  └→ grove-sensor-ingest
-  └→ grove-timeseries (VictoriaMetrics)
-  └→ grove-safety
-       └→ grove-control
-       └→ grove-mixer
-       └→ grove-composter
-  └→ grove-recipe
-  └→ grove-vision
-  └→ grove-planner
-  └→ grove-scheduler
-  └→ grove-alerting
-  └→ grove-ui
+kratt-bus (NATS)
+  └→ kratt-sensor-ingest
+  └→ kratt-timeseries (VictoriaMetrics)
+  └→ kratt-safety
+       └→ kratt-control
+       └→ kratt-mixer
+       └→ kratt-composter
+  └→ kratt-recipe
+  └→ kratt-vision
+  └→ kratt-planner
+  └→ kratt-scheduler
+  └→ kratt-alerting
+  └→ kratt-ui
 ```
 
 ## Control loop

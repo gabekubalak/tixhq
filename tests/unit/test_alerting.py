@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../services/alert
 def test_alert_schema_compliance():
     """Validate that sample alert messages match the JSON Schema."""
     import jsonschema
-    schema_path = os.path.join(os.path.dirname(__file__), "../../schemas/grove.event.alert.schema.json")
+    schema_path = os.path.join(os.path.dirname(__file__), "../../schemas/kratt.event.alert.schema.json")
     with open(schema_path) as f:
         schema = json.load(f)
 
@@ -25,7 +25,7 @@ def test_alert_schema_compliance():
 def test_safety_trip_schema():
     """Validate safety trip messages against schema."""
     import jsonschema
-    schema_path = os.path.join(os.path.dirname(__file__), "../../schemas/grove.event.safety.trip.schema.json")
+    schema_path = os.path.join(os.path.dirname(__file__), "../../schemas/kratt.event.safety.trip.schema.json")
     with open(schema_path) as f:
         schema = json.load(f)
 
@@ -42,7 +42,7 @@ def test_safety_trip_schema():
 def test_dose_command_schema():
     """Validate dose commands against schema."""
     import jsonschema
-    schema_path = os.path.join(os.path.dirname(__file__), "../../schemas/grove.command.dose.schema.json")
+    schema_path = os.path.join(os.path.dirname(__file__), "../../schemas/kratt.command.dose.schema.json")
     with open(schema_path) as f:
         schema = json.load(f)
 

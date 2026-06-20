@@ -1,4 +1,4 @@
-# GroveOS v1 — Bill of Materials
+# KrattOS v1 — Bill of Materials
 
 Single-rack home appliance. Quantities for ONE unit. Prices are
 ballpark single-unit retail in USD (Q4 2025) — at-scale pricing in the

@@ -1,17 +1,17 @@
 import * as THREE from "three";
 
-// 3D node-graph view of the GroveOS service architecture.
+// 3D node-graph view of the KrattOS service architecture.
 // Services are labelled boxes laid out on a horizontal plane;
 // NATS subjects are coloured TubeGeometry curves between them.
 
 const NS_COLOR = {
-  "grove.zone":      0x4a8cff,
-  "grove.manifold":  0x5dbdc7,
-  "grove.planner":   0x4caf50,
-  "grove.vision":    0xa040c0,
-  "grove.composter": 0x8d6e3c,
-  "grove.command":   0xff8c00,
-  "grove.event":     0xe03030,
+  "kratt.zone":      0x4a8cff,
+  "kratt.manifold":  0x5dbdc7,
+  "kratt.planner":   0x4caf50,
+  "kratt.vision":    0xa040c0,
+  "kratt.composter": 0x8d6e3c,
+  "kratt.command":   0xff8c00,
+  "kratt.event":     0xe03030,
 };
 
 const SERVICES = [
@@ -39,34 +39,34 @@ const SERVICES = [
 // Pubs/subs encode the directed flow; each edge is a NATS subject.
 const EDGES = [
   // sensor frames flow MCU → ingest → planner/control/UI
-  { from: "sensor-mcu",     to: "sensor-ingest",  subject: "usb.cdc.frame",                 ns: "grove.zone" },
-  { from: "sensor-ingest",  to: "control-loop",   subject: "grove.zone.{N}.sensor.moisture", ns: "grove.zone" },
-  { from: "sensor-ingest",  to: "ai-planner",     subject: "grove.zone.{N}.sensor.moisture", ns: "grove.zone" },
-  { from: "sensor-ingest",  to: "ui-backend",     subject: "grove.zone.{N}.sensor.moisture", ns: "grove.zone" },
-  { from: "sensor-ingest",  to: "nutrient-mixer", subject: "grove.manifold.sensor.*",        ns: "grove.manifold" },
+  { from: "sensor-mcu",     to: "sensor-ingest",  subject: "usb.cdc.frame",                 ns: "kratt.zone" },
+  { from: "sensor-ingest",  to: "control-loop",   subject: "kratt.zone.{N}.sensor.moisture", ns: "kratt.zone" },
+  { from: "sensor-ingest",  to: "ai-planner",     subject: "kratt.zone.{N}.sensor.moisture", ns: "kratt.zone" },
+  { from: "sensor-ingest",  to: "ui-backend",     subject: "kratt.zone.{N}.sensor.moisture", ns: "kratt.zone" },
+  { from: "sensor-ingest",  to: "nutrient-mixer", subject: "kratt.manifold.sensor.*",        ns: "kratt.manifold" },
   // recipe → planner → control / mixer
-  { from: "recipe-engine",  to: "control-loop",   subject: "grove.planner.setpoint.{N}",     ns: "grove.planner" },
-  { from: "recipe-engine",  to: "nutrient-mixer", subject: "grove.planner.setpoint.{N}",     ns: "grove.planner" },
-  { from: "recipe-engine",  to: "ui-backend",     subject: "grove.planner.setpoint.{N}",     ns: "grove.planner" },
-  { from: "ai-planner",     to: "recipe-engine",  subject: "grove.planner.setpoint.{N}",     ns: "grove.planner" },
+  { from: "recipe-engine",  to: "control-loop",   subject: "kratt.planner.setpoint.{N}",     ns: "kratt.planner" },
+  { from: "recipe-engine",  to: "nutrient-mixer", subject: "kratt.planner.setpoint.{N}",     ns: "kratt.planner" },
+  { from: "recipe-engine",  to: "ui-backend",     subject: "kratt.planner.setpoint.{N}",     ns: "kratt.planner" },
+  { from: "ai-planner",     to: "recipe-engine",  subject: "kratt.planner.setpoint.{N}",     ns: "kratt.planner" },
   // vision
-  { from: "ai-vision",      to: "ai-planner",     subject: "grove.vision.observation.{N}",   ns: "grove.vision" },
-  { from: "ai-vision",      to: "ui-backend",     subject: "grove.vision.observation.{N}",   ns: "grove.vision" },
+  { from: "ai-vision",      to: "ai-planner",     subject: "kratt.vision.observation.{N}",   ns: "kratt.vision" },
+  { from: "ai-vision",      to: "ui-backend",     subject: "kratt.vision.observation.{N}",   ns: "kratt.vision" },
   // commands
-  { from: "control-loop",   to: "sensor-mcu",     subject: "grove.command.valve",            ns: "grove.command" },
-  { from: "control-loop",   to: "sensor-mcu",     subject: "grove.command.light",            ns: "grove.command" },
-  { from: "nutrient-mixer", to: "sensor-mcu",     subject: "grove.command.dose",             ns: "grove.command" },
+  { from: "control-loop",   to: "sensor-mcu",     subject: "kratt.command.valve",            ns: "kratt.command" },
+  { from: "control-loop",   to: "sensor-mcu",     subject: "kratt.command.light",            ns: "kratt.command" },
+  { from: "nutrient-mixer", to: "sensor-mcu",     subject: "kratt.command.dose",             ns: "kratt.command" },
   // composter
-  { from: "composter-mcu",  to: "composter-ctrl", subject: "grove.composter.sensor.*",       ns: "grove.composter" },
-  { from: "composter-ctrl", to: "ui-backend",     subject: "grove.composter.state",          ns: "grove.composter" },
-  { from: "composter-ctrl", to: "composter-mcu",  subject: "grove.composter.command",        ns: "grove.composter" },
+  { from: "composter-mcu",  to: "composter-ctrl", subject: "kratt.composter.sensor.*",       ns: "kratt.composter" },
+  { from: "composter-ctrl", to: "ui-backend",     subject: "kratt.composter.state",          ns: "kratt.composter" },
+  { from: "composter-ctrl", to: "composter-mcu",  subject: "kratt.composter.command",        ns: "kratt.composter" },
   // events
-  { from: "safety-mcu",     to: "safety-watcher", subject: "grove.event.safety.trip",        ns: "grove.event" },
-  { from: "safety-watcher", to: "ui-backend",     subject: "grove.event.safety.trip",        ns: "grove.event" },
-  { from: "control-loop",   to: "alerting",       subject: "grove.event.alert.*",            ns: "grove.event" },
-  { from: "alerting",       to: "ui-backend",     subject: "grove.event.alert.*",            ns: "grove.event" },
+  { from: "safety-mcu",     to: "safety-watcher", subject: "kratt.event.safety.trip",        ns: "kratt.event" },
+  { from: "safety-watcher", to: "ui-backend",     subject: "kratt.event.safety.trip",        ns: "kratt.event" },
+  { from: "control-loop",   to: "alerting",       subject: "kratt.event.alert.*",            ns: "kratt.event" },
+  { from: "alerting",       to: "ui-backend",     subject: "kratt.event.alert.*",            ns: "kratt.event" },
   // UI fan-out
-  { from: "ui-backend",     to: "ui-frontend",    subject: "/api/stream (SSE)",              ns: "grove.zone" },
+  { from: "ui-backend",     to: "ui-frontend",    subject: "/api/stream (SSE)",              ns: "kratt.zone" },
 ];
 
 const TIER_Y = [0.0, 0.8, 1.6, 2.4];

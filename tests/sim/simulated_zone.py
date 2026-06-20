@@ -10,10 +10,10 @@ Run:
     python tests/sim/simulated_zone.py --shelf 3 --hours 24
 
 The simulator publishes:
-  - grove.zone.{id}.sensor.moisture            every 1 s
-  - grove.manifold.sensor.{ec|ph|flow}         every 5 s
-  - grove.composter.sensor.{ec|temp}           every 10 s
-and subscribes to grove.command.dose to observe what the planner asks for.
+  - kratt.zone.{id}.sensor.moisture            every 1 s
+  - kratt.manifold.sensor.{ec|ph|flow}         every 5 s
+  - kratt.composter.sensor.{ec|temp}           every 10 s
+and subscribes to kratt.command.dose to observe what the planner asks for.
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ async def _moisture_loop(nats: NATS, shelf: int, dry_rate_pct_per_h: float) -> N
         moisture -= dry_rate_pct_per_h / 3600.0
         moisture = max(20.0, min(95.0, moisture + random.gauss(0, 0.1)))
         for probe in ("A", "B", "C"):
-            await nats.publish(f"grove.zone.{shelf}.sensor.moisture",
+            await nats.publish(f"kratt.zone.{shelf}.sensor.moisture",
                 json.dumps({
                     "ts": _now(), "shelf_id": shelf, "probe_id": probe,
                     "value_pct": round(moisture, 2), "raw_adc": 1800,
@@ -53,7 +53,7 @@ async def _manifold_loop(nats: NATS) -> None:
         ec = 1.2 + 0.1 * math.sin(t / 600.0) + random.gauss(0, 0.01)
         ph = 6.1 + 0.05 * math.sin(t / 900.0) + random.gauss(0, 0.01)
         for kind, value in (("ec", ec), ("ph", ph), ("flow", 1.0)):
-            await nats.publish(f"grove.manifold.sensor.{kind}",
+            await nats.publish(f"kratt.manifold.sensor.{kind}",
                 json.dumps({"ts": _now(), "kind": kind, "value": round(value, 3)}).encode())
         t += 5
         await asyncio.sleep(5.0)
@@ -64,13 +64,13 @@ async def _composter_loop(nats: NATS) -> None:
     while True:
         temp += random.gauss(0, 0.3)
         for kind, value in (("temp", temp), ("ec", 1.8)):
-            await nats.publish(f"grove.composter.sensor.{kind}",
+            await nats.publish(f"kratt.composter.sensor.{kind}",
                 json.dumps({"ts": _now(), "kind": kind, "value": round(value, 2)}).encode())
         await asyncio.sleep(10.0)
 
 
 async def _dose_observer(nats: NATS) -> None:
-    sub = await nats.subscribe("grove.command.dose")
+    sub = await nats.subscribe("kratt.command.dose")
     async for msg in sub.messages:
         print("dose observed:", msg.data.decode())
 

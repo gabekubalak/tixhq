@@ -1,6 +1,6 @@
 # Getting started
 
-This guide walks through bringing up a fresh GroveOS appliance and planting
+This guide walks through bringing up a fresh KrattOS appliance and planting
 your first crop.
 
 ## 1. First boot
@@ -8,8 +8,8 @@ your first crop.
 1. Connect 24V power. The contactor stays open until the safety MCU
    completes its self-check (~3 seconds — front-panel LCD will show
    `SAFETY: ARMED`).
-2. The LCD will display the LAN address (`grove.local` or `grove-XXXX.local`).
-3. From a phone or laptop on the same LAN, open `http://grove.local` in a
+2. The LCD will display the LAN address (`kratt.local` or `kratt-XXXX.local`).
+3. From a phone or laptop on the same LAN, open `http://kratt.local` in a
    browser. No login is required — the UI is LAN-only.
 
 ## 2. Calibrate the probes

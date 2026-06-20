@@ -1,4 +1,4 @@
-# GroveOS bill of materials
+# KrattOS bill of materials
 
 Quantities below are for a single rack of four shelves. Multiply per shelf
 or per rack where noted.

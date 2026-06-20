@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.command.assign_recipe",
+  "$id": "kratt.command.assign_recipe",
   "title": "Assign a crop recipe to a shelf",
   "type": "object",
   "required": ["shelf_id", "crop"],

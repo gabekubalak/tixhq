@@ -1,7 +1,7 @@
 """Safety supervisor fault injection.
 
 Publishes synthetic out-of-bounds telemetry and asserts the safety watcher
-emits grove.event.safety.trip within 1 s. Run against a live bus.
+emits kratt.event.safety.trip within 1 s. Run against a live bus.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from nats.aio.client import Client as NATS
 async def expect_trip(nats: NATS, cause: str, send: dict) -> None:
     seen: list[dict] = []
     sub = await nats.subscribe(
-        "grove.event.safety.trip",
+        "kratt.event.safety.trip",
         cb=lambda m: seen.append(json.loads(m.data)),
     )
     await nats.publish(send["subject"], json.dumps(send["body"]).encode())
@@ -39,17 +39,17 @@ async def amain() -> None:
     cases = [
         {
             "cause": "ec_runaway",
-            "subject": "grove.manifold.sensor.ec",
+            "subject": "kratt.manifold.sensor.ec",
             "body": {"ts": "2026-01-01T00:00:00Z", "kind": "ec", "value": 4.5},
         },
         {
             "cause": "ph_high",
-            "subject": "grove.manifold.sensor.ph",
+            "subject": "kratt.manifold.sensor.ph",
             "body": {"ts": "2026-01-01T00:00:00Z", "kind": "ph", "value": 8.5},
         },
         {
             "cause": "over_temp",
-            "subject": "grove.composter.sensor.temp",
+            "subject": "kratt.composter.sensor.temp",
             "body": {"ts": "2026-01-01T00:00:00Z", "kind": "temp", "value": 70.0},
         },
     ]

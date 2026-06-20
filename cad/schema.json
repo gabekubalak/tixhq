@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.cad.dimensions",
-  "title": "Physical dimensions of the GroveOS v1 appliance",
+  "$id": "kratt.cad.dimensions",
+  "title": "Physical dimensions of the KrattOS v1 appliance",
   "type": "object",
   "required": [
     "units", "cabinet", "door", "vents", "racks",

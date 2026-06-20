@@ -26,7 +26,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-log = logging.getLogger("grove-ui")
+log = logging.getLogger("kratt-ui")
 from pathlib import Path
 from typing import AsyncIterator
 
@@ -36,12 +36,12 @@ from fastapi.responses import StreamingResponse
 from nats.aio.client import Client as NATS
 from pydantic import BaseModel
 
-RECIPES_DIR = Path(os.environ.get("GROVE_RECIPES", "/opt/grove/recipes"))
+RECIPES_DIR = Path(os.environ.get("KRATT_RECIPES", "/opt/kratt/recipes"))
 CAD_DIMENSIONS_PATH = Path(os.environ.get(
-    "GROVE_CAD_DIMENSIONS",
+    "KRATT_CAD_DIMENSIONS",
     str(Path(__file__).resolve().parents[3] / "cad" / "dimensions.yaml"),
 ))
-STREAM_INTERVAL_S = float(os.environ.get("GROVE_STREAM_INTERVAL_S", "0.5"))
+STREAM_INTERVAL_S = float(os.environ.get("KRATT_STREAM_INTERVAL_S", "0.5"))
 
 
 class State:
@@ -84,12 +84,12 @@ async def _connect_bus() -> NATS:
     async def on_trip(msg):
         state.safety_trip = json.loads(msg.data)
 
-    await nats.subscribe("grove.zone.*.sensor.moisture", cb=lambda m: asyncio.create_task(on_sensor(m)))
-    await nats.subscribe("grove.planner.setpoint.*",     cb=lambda m: asyncio.create_task(on_setpoint(m)))
-    await nats.subscribe("grove.vision.observation.*",   cb=lambda m: asyncio.create_task(on_vision(m)))
-    await nats.subscribe("grove.composter.state",        cb=lambda m: asyncio.create_task(on_compost(m)))
-    await nats.subscribe("grove.event.alert.*",          cb=lambda m: asyncio.create_task(on_alert(m)))
-    await nats.subscribe("grove.event.safety.trip",      cb=lambda m: asyncio.create_task(on_trip(m)))
+    await nats.subscribe("kratt.zone.*.sensor.moisture", cb=lambda m: asyncio.create_task(on_sensor(m)))
+    await nats.subscribe("kratt.planner.setpoint.*",     cb=lambda m: asyncio.create_task(on_setpoint(m)))
+    await nats.subscribe("kratt.vision.observation.*",   cb=lambda m: asyncio.create_task(on_vision(m)))
+    await nats.subscribe("kratt.composter.state",        cb=lambda m: asyncio.create_task(on_compost(m)))
+    await nats.subscribe("kratt.event.alert.*",          cb=lambda m: asyncio.create_task(on_alert(m)))
+    await nats.subscribe("kratt.event.safety.trip",      cb=lambda m: asyncio.create_task(on_trip(m)))
     return nats
 
 
@@ -100,7 +100,7 @@ async def lifespan(app: FastAPI):
     await app.state.nats.drain()
 
 
-app = FastAPI(title="GroveOS", lifespan=lifespan)
+app = FastAPI(title="KrattOS", lifespan=lifespan)
 
 
 @app.get("/api/zones")
@@ -138,7 +138,7 @@ async def safety_reset(ack: Ack) -> dict:
         "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "ack_for": state.safety_trip.get("cause"),
     }).encode()
-    await app.state.nats.publish("grove.command.safety.ack", payload)
+    await app.state.nats.publish("kratt.command.safety.ack", payload)
     state.safety_trip = None
     return {"ok": True}
 
@@ -195,5 +195,5 @@ async def assign_recipe(shelf_id: int, body: AssignRecipe) -> dict:
     if not body.physically_present:
         raise HTTPException(400, "physically_present must be true")
     msg = json.dumps({"shelf_id": shelf_id, "crop": body.crop}).encode()
-    await app.state.nats.publish("grove.command.assign_recipe", msg)
+    await app.state.nats.publish("kratt.command.assign_recipe", msg)
     return {"ok": True}

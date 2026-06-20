@@ -1,7 +1,7 @@
 [project]
-name = "grove-ui-backend"
+name = "kratt-ui-backend"
 version = "0.1.0"
-description = "FastAPI backend for the LAN-only GroveOS UI"
+description = "FastAPI backend for the LAN-only KrattOS UI"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.110",

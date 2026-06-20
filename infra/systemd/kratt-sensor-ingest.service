@@ -1,0 +1,16 @@
+[Unit]
+Description=KrattOS sensor ingestion
+PartOf=kratt.target
+After=kratt-bus.service
+Requires=kratt-bus.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/usr/bin/python3 -m sensor_ingest
+WorkingDirectory=/opt/kratt/services/sensor-ingest
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=kratt.target

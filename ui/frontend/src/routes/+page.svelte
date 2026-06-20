@@ -21,7 +21,7 @@
   });
 </script>
 
-<h1>GroveOS</h1>
+<h1>KrattOS</h1>
 
 <nav class="views">
   <a href="/recipes">Recipes</a>

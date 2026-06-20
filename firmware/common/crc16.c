@@ -1,6 +1,6 @@
 #include "crc16.h"
 
-uint16_t grove_crc16(const uint8_t *data, size_t len) {
+uint16_t kratt_crc16(const uint8_t *data, size_t len) {
     uint16_t crc = 0xFFFF;
     for (size_t i = 0; i < len; i++) {
         crc ^= ((uint16_t)data[i]) << 8;

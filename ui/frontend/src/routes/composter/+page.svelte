@@ -43,7 +43,7 @@
   });
 </script>
 
-<h1>GroveOS — Composter</h1>
+<h1>KrattOS — Composter</h1>
 <nav class="views">
   <a href="/">← Dashboard</a>
   <a href="/recipes">Recipes</a>

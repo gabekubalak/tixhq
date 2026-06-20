@@ -1,0 +1,15 @@
+[Unit]
+Description=KrattOS local alerting (buzzer / LCD / LAN companion)
+PartOf=kratt.target
+After=kratt-bus.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/usr/bin/python3 -m alerting
+WorkingDirectory=/opt/kratt/services/alerting
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=kratt.target

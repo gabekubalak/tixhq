@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.composter.state",
+  "$id": "kratt.composter.state",
   "title": "Composter batch state",
   "type": "object",
   "required": ["ts", "batch_id", "phase"],

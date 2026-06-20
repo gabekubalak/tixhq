@@ -4,7 +4,7 @@ Reads YAML recipes, tracks each active shelf's phase, advances on either
 time elapsed OR a satisfying vision observation, publishes setpoints.
 
 State (active recipe per shelf, phase index, phase started timestamp) is
-persisted in /var/lib/grove/recipe-state.json so a restart resumes cleanly.
+persisted in /var/lib/kratt/recipe-state.json so a restart resumes cleanly.
 """
 
 from __future__ import annotations
@@ -20,8 +20,8 @@ from pathlib import Path
 import yaml
 from nats.aio.client import Client as NATS
 
-RECIPES_DIR = Path(os.environ.get("GROVE_RECIPES", "/opt/grove/recipes"))
-STATE_PATH = Path(os.environ.get("GROVE_STATE_DIR", "/var/lib/grove")) / "recipe-state.json"
+RECIPES_DIR = Path(os.environ.get("KRATT_RECIPES", "/opt/kratt/recipes"))
+STATE_PATH = Path(os.environ.get("KRATT_STATE_DIR", "/var/lib/kratt")) / "recipe-state.json"
 TICK_SECONDS = 60.0
 
 log = logging.getLogger("recipe-engine")
@@ -109,7 +109,7 @@ async def _publish_setpoint(nats: NATS, s: ShelfState, phase: dict) -> None:
         "hours_on": light.get("hours_on", 0),
     }
     await nats.publish(
-        f"grove.planner.setpoint.{s.shelf_id}", json.dumps(payload).encode()
+        f"kratt.planner.setpoint.{s.shelf_id}", json.dumps(payload).encode()
     )
 
 
@@ -152,11 +152,11 @@ async def amain() -> None:
     recipes = {sid: _load_recipe(s.crop) for sid, s in state.items()}
 
     await nats.subscribe(
-        "grove.vision.observation.*",
+        "kratt.vision.observation.*",
         cb=lambda m: asyncio.create_task(_on_vision(state, m)),
     )
     await nats.subscribe(
-        "grove.command.assign_recipe",
+        "kratt.command.assign_recipe",
         cb=lambda m: asyncio.create_task(_on_assign(state, recipes, m)),
     )
 
@@ -171,7 +171,7 @@ async def amain() -> None:
             if not s.harvest_notified and _harvest_ready(s, r):
                 s.harvest_notified = True
                 await nats.publish(
-                    "grove.event.alert.info",
+                    "kratt.event.alert.info",
                     json.dumps({
                         "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                         "severity": "info",

@@ -1,6 +1,6 @@
 /**
  * Headless three.js renderer using headless-gl.
- * Produces assets/render/grove-3d.png — a product-shot of the appliance.
+ * Produces assets/render/kratt-3d.png — a product-shot of the appliance.
  *
  * Run from the repo root:
  *   node scripts/render_screenshot.mjs
@@ -247,7 +247,7 @@ ctx.putImageData(imgData, 0, 0);
 // ── Save ─────────────────────────────────────────────────────────────────────
 const outDir = path.join(ROOT, "assets/render");
 fs.mkdirSync(outDir, { recursive: true });
-const outPath = path.join(outDir, "grove-3d.png");
+const outPath = path.join(outDir, "kratt-3d.png");
 const buf = canvas2d.toBuffer("image/png");
 fs.writeFileSync(outPath, buf);
 console.log(`Saved ${outPath} (${(buf.length/1024).toFixed(0)} KB)`);

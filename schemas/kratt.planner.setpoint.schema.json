@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.planner.setpoint",
+  "$id": "kratt.planner.setpoint",
   "title": "Per-zone setpoints emitted by the recipe engine / planner",
   "type": "object",
   "required": ["ts", "shelf_id", "ec_ms_cm", "ph", "moisture_pct"],

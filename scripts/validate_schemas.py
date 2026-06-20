@@ -1,4 +1,4 @@
-"""Validate the GroveOS contracts in this repo.
+"""Validate the KrattOS contracts in this repo.
 
 Checks:
   1. Every schemas/*.json is valid JSON Schema (draft 2020-12).
@@ -41,9 +41,9 @@ def main() -> int:
         except Exception as e:
             errs.append(f"{path}: {e}")
 
-    sp_schema = schemas.get("grove.planner.setpoint.schema")
+    sp_schema = schemas.get("kratt.planner.setpoint.schema")
     if sp_schema is None:
-        errs.append("missing grove.planner.setpoint.schema.json")
+        errs.append("missing kratt.planner.setpoint.schema.json")
 
     recipes: list[pathlib.Path] = sorted(RECIPE_DIR.glob("*.yaml"))
     for path in recipes:

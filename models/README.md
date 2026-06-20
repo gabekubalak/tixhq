@@ -1,6 +1,6 @@
 # Models
 
-On-device ML models for GroveOS vision and planning. Models run locally
+On-device ML models for KrattOS vision and planning. Models run locally
 on the Jetson Orin Nano via ONNX Runtime (TensorRT EP preferred). No
 network access is required or used.
 
@@ -16,7 +16,7 @@ network access is required or used.
 
 Model files are NOT committed to git. They ship inside signed update
 bundles (see `services/update-manager/`). On a fresh appliance, models
-are pre-installed at `/opt/grove/models/` as part of the factory rootfs.
+are pre-installed at `/opt/kratt/models/` as part of the factory rootfs.
 
 ## Training
 

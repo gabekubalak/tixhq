@@ -87,11 +87,11 @@
   });
 </script>
 
-<svelte:head><title>GroveOS · architecture</title></svelte:head>
+<svelte:head><title>KrattOS · architecture</title></svelte:head>
 
 <div class="bar">
   <a href="/">← Dashboard</a>
-  <h1>GroveOS · architecture</h1>
+  <h1>KrattOS · architecture</h1>
   <a href="/3d">3D twin →</a>
   <span class="legend">
     {#each Object.entries(NS_COLOR) as [ns, hex]}

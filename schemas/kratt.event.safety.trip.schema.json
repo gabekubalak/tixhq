@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "grove.event.safety.trip",
+  "$id": "kratt.event.safety.trip",
   "title": "Safety supervisor trip event",
   "description": "Latched. Requires UI acknowledgement plus physical reset.",
   "type": "object",

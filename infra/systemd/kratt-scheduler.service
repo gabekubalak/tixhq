@@ -1,0 +1,15 @@
+[Unit]
+Description=KrattOS scheduler (light photoperiod, pump duty)
+PartOf=kratt.target
+After=kratt-recipe.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/usr/bin/python3 -m scheduler
+WorkingDirectory=/opt/kratt/services/scheduler
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=kratt.target

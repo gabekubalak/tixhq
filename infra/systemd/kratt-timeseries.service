@@ -1,0 +1,17 @@
+[Unit]
+Description=KrattOS time-series store (VictoriaMetrics single-node)
+PartOf=kratt.target
+After=kratt-bus.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/usr/local/bin/victoria-metrics-prod \
+  -storageDataPath=/var/lib/kratt/vm \
+  -retentionPeriod=10y \
+  -httpListenAddr=127.0.0.1:8428
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=kratt.target

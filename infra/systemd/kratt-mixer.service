@@ -1,0 +1,14 @@
+[Unit]
+Description=KrattOS nutrient mixer
+PartOf=kratt.target
+After=kratt-planner.service kratt-safety.service
+
+[Service]
+Type=simple
+User=kratt
+ExecStart=/opt/kratt/bin/nutrient-mixer
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=kratt.target

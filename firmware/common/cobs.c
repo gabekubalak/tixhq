@@ -1,6 +1,6 @@
 #include "cobs.h"
 
-size_t grove_cobs_encode(const uint8_t *in, size_t in_len,
+size_t kratt_cobs_encode(const uint8_t *in, size_t in_len,
                          uint8_t *out, size_t out_cap) {
     if (out_cap < in_len + (in_len / 254) + 1) return 0;
 
@@ -27,7 +27,7 @@ size_t grove_cobs_encode(const uint8_t *in, size_t in_len,
     return out_idx;
 }
 
-size_t grove_cobs_decode(const uint8_t *in, size_t in_len,
+size_t kratt_cobs_decode(const uint8_t *in, size_t in_len,
                          uint8_t *out, size_t out_cap) {
     size_t in_idx = 0;
     size_t out_idx = 0;
