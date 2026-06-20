@@ -17,9 +17,9 @@ A few alternates to test if you want:
 
 ## Funding goal
 
-**$45,000.** That covers three working prototypes, the provisional
-patent, and the first ten units going out to restaurants who'll test
-them in a real kitchen.
+**$3,000.** Enough to build one working KrattOS and prove it grows food
+on its own, offline, on camera. That's the whole ask. Not a company, not
+a factory. One unit that works, filmed start to finish.
 
 ## Hero image
 
@@ -116,72 +116,68 @@ most hobby hydroponics already works. KrattOS just runs it for you.
 This is the part of the project we're proudest of. A serious food
 appliance shouldn't cost as much as a used car to be useful.
 
-### Where your money goes
+### What this raise builds
+
+One thing: the first working KrattOS, built and filmed proving it grows
+food on its own. We're doing it in two phases so you see results fast.
+
+- **Phase 1, the first few weeks.** A budget build on a wire rack:
+  lights, pump, sensors, and the dashboard, all running offline. Enough
+  to put real lettuce on camera, growing by itself.
+- **Phase 2, the upgrade.** That same unit gets the full design: the AI
+  brain, a camera watching the canopy, EC and pH control, and automated
+  dosing. This proves the headline, an offline AI that runs the grow
+  itself.
+
+Where the $3,000 goes:
 
 | What | Amount | Covers |
 |------|-------:|--------|
-| 3 working prototypes | $18,000 | Edge-AI boards, microcontrollers, EC/pH probes, pumps, LED panels, cabinet fabrication, food-grade plumbing |
-| First production cabinets | $12,000 | Tooling deposit at a US contract manufacturer for a 10-unit run |
-| 10 pilot installs at restaurants | $9,000 | Free units, six months of free seed pods, on-site setup and training |
-| Provisional patent and IP | $2,500 | USPTO filing, a freedom-to-operate check, the "KrattOS" trademark |
-| Recipe development | $3,500 | Crop scientists tuning the lettuce, basil, microgreens, and strawberry recipes against real harvest data |
+| Phase 1 budget unit | $400 | Raspberry Pi, sensors, pump, lights, a wire rack, trays, reservoir |
+| Phase 2 AI upgrade | $1,900 | The Jetson AI brain, camera, EC and pH probes, dosing pumps, more grow lights |
+| Seeds, nutrients, spares | $500 | Consumables and replacements for the parts that always fail the first time |
+| Shipping and platform fees | $200 | Getting parts here, and GoFundMe's cut |
 
-Anything past the $45k goal goes straight into building more pilot
-units. Every extra $4,500 puts one more KrattOS in a restaurant or
-school kitchen for six months, free.
+No production tooling, no team, no fancy cabinet yet. Just enough to
+prove it works and put it on video. Anything past $3,000 goes straight
+to a second unit and the first conversations with restaurants who want
+to test one.
 
 ---
 
 ## Reward tiers (perks)
 
 GoFundMe doesn't run tiered rewards the way Kickstarter does, so list
-these in the story and fulfill them yourself as people opt in. (If you
-move to Kickstarter later, they lift straight over.)
+these in the story and fulfill them as people opt in. These are sized
+for a proof campaign: small thank-yous, plus kit pre-orders for people
+who want one once it's proven. No promises that can't be kept yet.
 
-### $25, "Mark on the wall"
-Your name on a brass plate inside the first production KrattOS, mounted
-by the composter door. We'll email you a photo of it installed.
+### $10, "Cheer it on"
+A real thank-you and every build update as it happens, lettuce included.
+
+### $25, "Name on the first unit"
+Your name goes on the first KrattOS we build, with a photo of it
+growing. Plus the updates.
 
 ### $75, "Seed library"
-A starter set of heirloom seeds for the recipes we're tuning
-(buttercrunch, basil genovese, mizuna, microgreens mix). Includes the
-photo from the $25 tier.
+A starter set of heirloom seeds for the recipes (buttercrunch, basil
+genovese, mizuna, microgreens mix). Plus everything above.
 
-### $250, "Early access"
-Hands-on access to the dashboard and the 3D twin once we're running,
-plus monthly behind-the-scenes updates from the workshop. Includes
-everything above.
+### $149, "Nano kit" (pre-order)
+A KrattOS Nano, shipped once the design is proven. Clips onto a wire
+rack you already own: controller, relay board, pump, fan, sensors, a
+12V LED grow bar, drip manifold and tubing, wiring, and the printed
+box. Bring your own rack, trays, seeds, and bucket. Estimated ship:
+month 6.
 
-### $149, "Nano kit"
-A pre-built KrattOS Nano shipped to you. Clips onto a wire shelf rack
-you already own. ESP32 controller, relay board, pump, fan, two
-moisture probes, temperature and humidity sensor, leak sensor, water
-float, a 12V LED grow bar, drip manifold and tubing, all the wiring
-and the printed controller box. Bring your own rack, trays, seeds,
-and bucket. Estimated ship: month 6.
+### $279, "Lite kit" (pre-order)
+Everything in the Nano kit, plus a Raspberry Pi 4 pre-flashed with the
+full dashboard and recipe library. Same self-setup on a rack you
+already own. Estimated ship: month 6.
 
-### $279, "Lite kit"
-A pre-built KrattOS Lite. Everything in the Nano kit, plus a
-Raspberry Pi 4 pre-flashed with the trimmed KrattOS, the full
-dashboard, the recipe library, and the local logging. Same self-setup
-on a rack you already own. Estimated ship: month 6.
-
-### $1,500, "Founding owner"
-One of the first ten units off the line, shipped to you at half the
-eventual $4,499 retail price. Estimated ship: month 8. Limited to 10
-backers. This is the big one. It's literally how the first units get
-into the world.
-
-### $5,000, "Restaurant install"
-Reserve one of the pilot kitchen installs. We'll deliver and set up a
-KrattOS in your restaurant, train your team, and tune the recipes to
-your menu over the first three months. Limited to 3 backers.
-
-### $25,000, "Founding patron"
-Fund a whole pilot site at a school, food bank, or non-profit you care
-about (we'll help you pick one if you don't have it in mind). Your name,
-or your foundation's, goes on the plaque at that site, and you get a
-unit of your own. Limited to 1 backer.
+### $500, "Back the next unit"
+You fund a whole second build. Your name on it, first in line for a kit
+when they ship, and early access to the dashboard and the 3D twin.
 
 ---
 
@@ -218,19 +214,18 @@ kit ships the brain. The full spec lives in the repo under
 `docs/hardware/krattos-lite.md`.
 
 **What if the goal isn't met?**
-GoFundMe lets you keep what you raise, so every dollar still moves the
-project forward. $20k builds one prototype and files the patent. $30k
-covers the full prototype run. The full $45k is what unlocks the
-restaurant pilots, and the pilots are what turn this from a project into
-a business.
+GoFundMe lets you keep what you raise, so every dollar still moves this
+forward. Even $400 builds the phase 1 unit and gets real lettuce growing
+on camera. The full $3,000 funds the AI upgrade on top, which is the part
+that proves the whole idea. There's no version of this where your money
+sits idle.
 
-**What if the project can't finish?**
-The real risk is the physical side: the cabinet, the plumbing, and the
-UL safety listing. None of those are done yet. If the project hits a
-wall it can't get past, everything learned gets published, the build
-documentation goes fully open, and the physical reward tiers ($1,500
-and up) get refunded proportionally. The brass plates and seed
-libraries ship no matter what, since they cost almost nothing.
+**What if the build hits a wall?**
+The software already works. The risk is in the physical assembly, and at
+this budget it's small: it's one unit on a rack, not a factory. If a
+part of the build proves harder than expected, everything learned gets
+published and the kit pre-orders ($149 and $279) get refunded. The seed
+libraries and thank-you tiers cost almost nothing and ship regardless.
 
 **Is it open source?**
 The firmware, control loops, schemas, and update system are MIT
@@ -249,8 +244,8 @@ The project, not the people. KrattOS is open on GitHub, so if you want
 proof, the commit history is right there. Go read it before you back it.
 
 **How do I follow along?**
-Updates post here on the campaign page, every week or two once we're
-past the first $5k. The code keeps shipping at
+Updates post right here on the campaign page as the build happens, from
+first parts to first harvest. The code keeps shipping at
 [github.com/yourname/kratt] in the meantime.
 
 ---
@@ -259,19 +254,19 @@ past the first $5k. The code keeps shipping at
 
 Draft these now and queue them up:
 
-1. **Day 0, launch.** "We're live. Here's the demo and what the first
-   $5k unlocks."
-2. **Week 2, workshop tour.** Photos of the bench, the boards, the first
-   microcontroller blinking to life.
-3. **Week 4, first sprouts.** Time-lapse of lettuce going from seed to
-   first true leaf.
-4. **Week 6, software walkthrough.** A 90-second clip of the dashboard
-   and the 3D twin updating in real time.
-5. **Week 8, composter trial.** First scraps going in, temperature
-   climbing into the hot phase.
-6. **Week 10, patent filed.** A shot of the USPTO receipt.
-7. **Week 12, first harvest.** The money shot. Lettuce on a plate,
-   dressing optional.
+1. **Day 0, launch.** "We're live. Here's the software running and what
+   the $3,000 builds."
+2. **Week 1, parts arrive.** The phase 1 kit on the bench, the rack going
+   together.
+3. **Week 2, it's alive.** The dashboard running offline, lights cycling,
+   pump kicking on, sensors reporting.
+4. **Week 3, seeds in.** Trays planted, first sprouts on camera.
+5. **Week 5, the AI upgrade.** Phase 2: the Jetson and camera go in, the
+   vision pipeline watching the canopy for the first time.
+6. **Week 7, growing on its own.** Time-lapse of the unit running the
+   grow with nobody touching it.
+7. **Week 9, first harvest.** The money shot. Lettuce on a plate,
+   dressing optional. Proof.
 
 ---
 
