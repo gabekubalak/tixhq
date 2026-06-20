@@ -13,8 +13,11 @@
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0d12);
 
-    camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.01, 100);
-    camera.position.set(0, 4.5, 6);
+    camera = new THREE.PerspectiveCamera(42, canvas.clientWidth / canvas.clientHeight, 0.01, 100);
+    // Steep overhead-front view. The tiers climb diagonally (each is both
+    // higher and further back), so looking down steeply maps tier depth to
+    // vertical screen position and the four tiers read as separate rows.
+    camera.position.set(0, 10, 5.3);
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -30,7 +33,7 @@
     scene.add(archGroup);
 
     controls = new OrbitControls(camera, canvas);
-    controls.target.set(0, 1.0, 0.8);
+    controls.target.set(0, 0.8, 0.5);
     controls.update();
 
     raycaster = new THREE.Raycaster();

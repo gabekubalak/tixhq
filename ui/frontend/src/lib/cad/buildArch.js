@@ -70,6 +70,12 @@ const EDGES = [
 ];
 
 const TIER_Y = [0.0, 0.8, 1.6, 2.4];
+// Each tier sits at a distinct depth; the separator line and label for a
+// tier are anchored to this z so they track the row instead of floating at
+// a fixed depth that only lined up under the original flat camera.
+const TIER_Z = [-1.0, 0.2, 1.2, 2.4];
+// Height of a node (box + label + edge anchor) above its group origin.
+const NODE_H = 0.32;
 
 function makeLabel(text, color = "#ffffff") {
   const canvas = document.createElement("canvas");
@@ -127,56 +133,72 @@ export function buildArch() {
   plane.position.y = -0.02;
   root.add(plane);
 
-  // Tier separator lines + labels.
-  const tierDefs = [
-    { y: TIER_Y[0], label: "Tier 0 — Embedded MCUs (ESP32-S3, FreeRTOS)" },
-    { y: TIER_Y[1], label: "Tier 1 — Ingest & Control (Python / Rust)" },
-    { y: TIER_Y[2], label: "Tier 2 — AI Planner & Safety (Python / Rust)" },
-    { y: TIER_Y[3], label: "Tier 3 — Local UI (FastAPI + SvelteKit)" },
+  // Tier separator lines + labels, anchored to each tier's own depth (z)
+  // and height (y) so they sit with the row of nodes they describe.
+  const tierLabels = [
+    "Tier 0 — Embedded MCUs (ESP32-S3, FreeRTOS)",
+    "Tier 1 — Ingest & Control (Python / Rust)",
+    "Tier 2 — AI Planner & Safety (Python / Rust)",
+    "Tier 3 — Local UI (FastAPI + SvelteKit)",
   ];
-  for (const { y, label } of tierDefs) {
+  for (let t = 0; t < tierLabels.length; t++) {
+    const y = TIER_Y[t];
+    const z = TIER_Z[t];
     const line = new THREE.Mesh(
       new THREE.BoxGeometry(7.6, 0.005, 0.005),
       new THREE.MeshStandardMaterial({ color: 0x304060, emissive: 0x304060 })
     );
-    line.position.set(0, y - 0.25, -0.5);
+    line.position.set(0, y - 0.05, z);
     root.add(line);
-    const sp = makeTierLabel(label);
-    if (sp) { sp.position.set(-2.0, y - 0.18, -0.5); root.add(sp); }
+    const sp = makeTierLabel(tierLabels[t]);
+    if (sp) { sp.position.set(-3.4, y + NODE_H, z); root.add(sp); }
   }
 
-  // Service boxes
+  // Service nodes. Box, label, and the edge anchor are all co-located at
+  // NODE_H above the group origin so tubes visibly terminate at the box the
+  // label names — no floating gap between the line and the node.
   const nodes = {};
   for (const s of SERVICES) {
     const g = new THREE.Group();
     g.userData = { partId: `service.${s.id}`, label: s.label };
     const box = new THREE.Mesh(
       new THREE.BoxGeometry(0.7, 0.3, 0.4),
-      new THREE.MeshStandardMaterial({ color: 0x2a3340, roughness: 0.6 })
+      new THREE.MeshStandardMaterial({
+        color: 0x2a3340,
+        emissive: 0x161c26,
+        emissiveIntensity: 0.8,
+        roughness: 0.6,
+      })
     );
-    box.position.y = 0.15;
+    box.position.y = NODE_H;
     g.add(box);
     const lbl = makeLabel(s.label);
-    lbl.position.set(0, 0.45, 0);
+    lbl.position.set(0, NODE_H, 0);
     g.add(lbl);
     g.position.set(s.x, TIER_Y[s.tier], s.z);
     root.add(g);
-    nodes[s.id] = g.position.clone().setY(TIER_Y[s.tier] + 0.15);
+    // Anchor edges at the node centre so both ends sit inside the box.
+    nodes[s.id] = g.position.clone().setY(TIER_Y[s.tier] + NODE_H);
   }
 
-  // Edges (NATS subjects) as curved tubes
+  // Edges (NATS subjects) as curved tubes. A quadratic Bézier through a
+  // single lifted control point gives a clean arc that always leaves each
+  // node toward the midpoint — no CatmullRom overshoot near the endpoints.
   for (const e of EDGES) {
     const a = nodes[e.from];
     const b = nodes[e.to];
     if (!a || !b) continue;
-    const mid = a.clone().lerp(b, 0.5).add(new THREE.Vector3(0, 0.5, 0));
-    const curve = new THREE.CatmullRomCurve3([a, mid, b]);
+    // Lift the control point proportionally to span so short hops stay flat
+    // and long hops arc enough to clear intervening nodes.
+    const lift = 0.18 + 0.12 * a.distanceTo(b);
+    const mid = a.clone().lerp(b, 0.5).add(new THREE.Vector3(0, lift, 0));
+    const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
     const tube = new THREE.Mesh(
-      new THREE.TubeGeometry(curve, 32, 0.012, 8, false),
+      new THREE.TubeGeometry(curve, 40, 0.013, 8, false),
       new THREE.MeshStandardMaterial({
         color: NS_COLOR[e.ns] ?? 0xffffff,
         emissive: NS_COLOR[e.ns] ?? 0xffffff,
-        emissiveIntensity: 0.25,
+        emissiveIntensity: 0.55,
         roughness: 0.4,
       })
     );
