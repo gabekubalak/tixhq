@@ -1,5 +1,12 @@
 # KrattOS: Pitch Deck Outline
 
+> **Scope.** This deck is the **post-proof** ask, for pre-seed angels,
+> agtech accelerators, and SBIR/STTR review panels. The current
+> public-facing ask is much smaller: the $3,000 GoFundMe to fund one
+> proof unit (see `gofundme-copy.md`). Use this deck after that proof
+> ships, when you have a time-lapse of lettuce growing under KrattOS to
+> open the demo slide with.
+
 A 10-slide deck for pre-seed angels, agtech accelerators, and SBIR/STTR
 review panels. Each slide lists the *one* thing it must land. Total
 read-aloud time ≈ 6 minutes.

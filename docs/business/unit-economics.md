@@ -1,5 +1,11 @@
 # KrattOS: Unit Economics
 
+> **Scope.** This is the **post-proof** business model: what the numbers
+> look like once the first unit has grown food on camera and the project
+> is going for a real seed round. The live GoFundMe is a much smaller
+> ask ($3,000 for one proof unit; see `gofundme-copy.md`). Treat
+> everything below as the long-term plan, not what's being sold today.
+
 Two revenue streams: the appliance (one-time) and the seed-pod
 subscription (recurring). All figures USD.
 

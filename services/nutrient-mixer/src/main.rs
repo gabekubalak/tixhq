@@ -54,7 +54,8 @@ fn pump_name(c: NutrientChoice) -> &'static str {
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt().init();
-    let client = async_nats::connect("127.0.0.1:4222").await?;
+    let nats_url = std::env::var("NATS_URL").unwrap_or_else(|_| "127.0.0.1:4222".into());
+    let client = async_nats::connect(nats_url.as_str()).await?;
     let state = Arc::new(Mutex::new(State::default()));
 
     let mut manifold = client.subscribe("kratt.manifold.sensor.*").await?;

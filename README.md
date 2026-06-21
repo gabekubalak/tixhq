@@ -1,5 +1,33 @@
 # KrattOS
 
+**An offline AI farm appliance.** You give it water and power. It runs
+the lights, the watering, the nutrient mix, and the safety cutoffs by
+itself, with no internet connection ever. You take out food.
+
+The full appliance is the size of a fridge, with four lit shelves and a
+composter in the base that turns your kitchen scraps into the nutrient
+mix that feeds the plants above it. But the same brain also runs on a
+Raspberry Pi clipped onto a wire shelf rack you already own. So
+KrattOS ships in three tiers:
+
+| Tier | Brain | What you get | Kit price |
+|------|-------|--------------|----------:|
+| **Nano** | ESP32 microcontroller | Light schedule, pump, sensors, dashboard over its own WiFi. Bring your own rack. | ~$149 |
+| **Lite** | Raspberry Pi 4 | The full dashboard and recipe library on a rack you already own. | ~$279 |
+| **Full** | Jetson Orin Nano | The finished cabinet appliance with vision AI, auto-dosing, and a composter. | ~$4,499 |
+
+A serious food appliance shouldn't cost as much as a used car to be
+useful. See [`docs/hardware/krattos-lite.md`](docs/hardware/krattos-lite.md)
+for the build philosophy and [`docs/README.md`](docs/README.md) for the
+full documentation map.
+
+We're currently running a **$3,000 GoFundMe** to fund the first proof
+unit: see [`docs/business/gofundme-copy.md`](docs/business/gofundme-copy.md).
+
+---
+
+## What's underneath
+
 Operating system for a closed-loop, vertically stacked indoor growing appliance.
 Air-gapped local AI controls light, water, nutrients, and pH. An on-board
 composter turns kitchen scraps into the bulk nutrient supply. Six small base
@@ -12,10 +40,10 @@ The design target is **home and prosumer** scale: 1 rack of 4-8 shelves, up to
 
 Two compute tiers talk over USB-CDC (COBS + CRC-16 framing):
 
-- **Real-time tier** — ESP32-S3 MCUs handle sensor sampling, pump pulses,
+- **Real-time tier**: ESP32-S3 MCUs handle sensor sampling, pump pulses,
   valve switching, light dimming, and an independent safety supervisor that
   gates the 24V actuator rail through a hardware contactor.
-- **Cognitive tier** — NVIDIA Jetson Orin Nano 8GB runs vision, planning,
+- **Cognitive tier**: NVIDIA Jetson Orin Nano 8GB runs vision, planning,
   control loops, storage, and the local web UI. All processes coordinate
   over a localhost-bound NATS bus with JetStream.
 
@@ -96,4 +124,4 @@ ui/backend                  uvicorn backend.main:app
 The safety MCU is independent of the Jetson. It cuts the 24V actuator rail
 on: leak detected, slurry tank over-temperature, EC > 4.0 mS/cm, pH outside
 [4.5, 8.0], any MCU heartbeat loss > 2 s, or the physical E-stop. The trip
-is latching — UI ack + physical reset required to re-energize.
+is latching, with UI ack + physical reset required to re-energize.

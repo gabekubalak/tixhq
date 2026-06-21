@@ -87,7 +87,8 @@ type ZoneMap = Arc<Mutex<HashMap<i64, Zone>>>;
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt().init();
-    let client = async_nats::connect("127.0.0.1:4222").await?;
+    let nats_url = std::env::var("NATS_URL").unwrap_or_else(|_| "127.0.0.1:4222".into());
+    let client = async_nats::connect(nats_url.as_str()).await?;
     let zones: ZoneMap = Arc::new(Mutex::new(HashMap::new()));
 
     // Setpoint subscriber.

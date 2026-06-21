@@ -1,5 +1,12 @@
 # KrattOS: Fundraising Roadmap
 
+> **Scope.** This roadmap is what comes **after** the GoFundMe proof
+> campaign ($3,000 for one working unit; see `gofundme-copy.md`). The
+> numbers below assume that proof has already shipped and there's
+> footage of lettuce growing under KrattOS. Don't pitch SBIR or angels
+> on the strength of the repo alone; pitch them on the strength of the
+> proof.
+
 The shortest path from "working software repo" to "funded hardware
 company." Read top-to-bottom; don't skip phases.
 

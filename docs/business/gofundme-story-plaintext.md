@@ -95,23 +95,30 @@ food on its own. We are doing it in two phases so you see results fast.
 Phase 1, the first few weeks. A budget build on a wire rack: lights,
 pump, sensors, and the dashboard, all running offline. Enough to put real
 lettuce on camera, growing by itself.
-Phase 2, the upgrade. That same unit gets the full design: the AI brain,
-a camera watching the canopy, EC and pH control, and automated dosing.
-This proves the headline, an offline AI that runs the grow itself.
+Phase 2, the AI add-on. That same unit gets the Jetson edge-AI brain, a
+camera watching the canopy, and the EC and pH probes that let the planner
+reason about nutrient state. The dashboard tells you when to top up. This
+proves the headline, an offline AI that watches the plants and runs the
+grow.
 
 Where the $3,000 goes:
 (Make the next four lines a bullet list.)
-$400 for the phase 1 budget unit: Raspberry Pi, sensors, pump, lights, a
-wire rack, trays, and a reservoir.
-$1,900 for the phase 2 AI upgrade: the AI brain, camera, EC and pH
-probes, dosing pumps, and more grow lights.
-$500 for seeds, nutrients, and replacements for the parts that always
-fail the first time.
+$400 for the phase 1 budget unit: Raspberry Pi, sensors, pump, fan, one
+LED grow bar, drip manifold, trays, and a reservoir.
+$1,900 for the phase 2 AI add-on: a used Jetson Nano, an IMX708 camera,
+Atlas EC and pH probes, three more LED bars, a dosing pump for manual
+top-ups, the rack, and mounting and cabling.
+$500 for the seed library, nutrient concentrate, and a backup of every
+sensor and the pump.
 $200 for shipping and the platform's fees.
 
-No production tooling, no team, no fancy cabinet yet. Just enough to
-prove it works and put it on video. Anything past $3,000 goes straight to
-a second unit and the first conversations with restaurants who want to
+What is NOT in this raise: the full six-channel auto-dosing rig, the
+composter loop, the steel cabinet, a UL listing, anyone's salary. Those
+are the next campaign, after the proof is on video. This raise covers
+exactly one thing: shipping the first working KrattOS and filming it.
+
+Anything past $3,000 goes straight to a second unit and the first
+conversations with restaurants who want to
 test one.
 
 

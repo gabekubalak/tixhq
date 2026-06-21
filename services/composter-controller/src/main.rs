@@ -134,7 +134,8 @@ fn advance(b: &mut Batch) {
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt().init();
-    let client = async_nats::connect("127.0.0.1:4222").await?;
+    let nats_url = std::env::var("NATS_URL").unwrap_or_else(|_| "127.0.0.1:4222".into());
+    let client = async_nats::connect(nats_url.as_str()).await?;
     let batch: Arc<Mutex<Batch>> = Arc::new(Mutex::new(Batch::new()));
 
     // Subscriber: latest temperature feeds the state machine.
