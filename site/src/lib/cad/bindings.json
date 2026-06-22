@@ -1,0 +1,51 @@
+{
+  "subjects": [
+    {
+      "subject": "kratt.zone.{N}.sensor.moisture",
+      "schema": "kratt.zone.sensor.moisture.schema.json",
+      "partId": "shelf.{N}.tray",
+      "effect": "lerp_color",
+      "from": "#6b4a32",
+      "to":   "#2a5a8c",
+      "field": "moisture_pct",
+      "field_max": 100
+    },
+    {
+      "subject": "kratt.planner.setpoint.{N}",
+      "schema": "kratt.planner.setpoint.schema.json",
+      "partId": "shelf.{N}.led",
+      "effect": "emissive_by_ppfd",
+      "field": "ppfd"
+    },
+    {
+      "subject": "kratt.vision.observation.{N}",
+      "schema": "kratt.vision.observation.schema.json",
+      "partId": "shelf.{N}.plants",
+      "effect": "rebuild_plants"
+    },
+    {
+      "subject": "kratt.composter.state",
+      "schema": "kratt.composter.state.schema.json",
+      "partId": "composter",
+      "effect": "composter_phase"
+    },
+    {
+      "subject": "kratt.event.alert.*",
+      "schema": "kratt.event.alert.schema.json",
+      "partId": "shelf.{N}.bezel",
+      "effect": "alert_pulse"
+    },
+    {
+      "subject": "kratt.event.safety.trip",
+      "schema": "kratt.event.safety.trip.schema.json",
+      "partId": "estop.cap",
+      "effect": "safety_trip"
+    },
+    {
+      "subject": "kratt.manifold.sensor",
+      "schema": "kratt.manifold.sensor.schema.json",
+      "partId": "reservoir.{N}",
+      "effect": "highlight_active_reservoir"
+    }
+  ]
+}
