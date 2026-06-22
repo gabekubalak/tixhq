@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -36,6 +37,31 @@ DIMS_PATH = ROOT / "cad" / "dimensions.yaml"
 
 def _dims() -> dict:
     return yaml.safe_load(DIMS_PATH.read_text())
+
+
+def _stub_profile(name: str) -> dict:
+    """Load a real profile YAML and flatten it to the /api/profile shape."""
+    path = ROOT / "profiles" / f"{name}.yaml"
+    if not path.exists():
+        return {
+            "name": "fallback", "form_factor": "appliance_cabinet",
+            "description": "no profile found", "zones": [],
+            "has_composter": False, "has_auto_dosing": False,
+        }
+    raw = yaml.safe_load(path.read_text())
+    manifold = raw.get("manifold", {})
+    return {
+        "name":        raw["name"],
+        "form_factor": raw["form_factor"],
+        "description": raw.get("description", ""),
+        "zones": [
+            {"id": z["id"], "label": z.get("label", f"Zone {z['id']}"),
+             "type": z["type"], "medium": z["medium"]}
+            for z in raw.get("zones", [])
+        ],
+        "has_composter":   bool(raw.get("composter", {}).get("enabled")),
+        "has_auto_dosing": bool(manifold.get("ec_probe") and manifold.get("ph_probe")),
+    }
 
 
 def _synthetic_snapshot(t: float) -> dict:
@@ -92,6 +118,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, [])
         if p == "/api/safety":
             return self._send_json(200, {"safety_trip": None})
+        if p == "/api/profile":
+            # Honor STUB_PROFILE env var so a dev can flip between cabinet
+            # and greenhouse UIs without touching anything else.
+            name = os.environ.get("STUB_PROFILE", "cabinet-v1")
+            return self._send_json(200, _stub_profile(name))
         if p == "/api/recipes":
             recipes = []
             for rp in (ROOT / "recipes").glob("*.yaml"):

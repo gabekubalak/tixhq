@@ -2,11 +2,12 @@
   import { page } from "$app/stores";
   $: pathname = $page.url.pathname;
   const nav = [
-    { href: "/",        label: "Home" },
-    { href: "/twin",    label: "The 3D twin" },
-    { href: "/system",  label: "System" },
-    { href: "/build",   label: "Build one" },
-    { href: "/pitch",   label: "Back it" }
+    { href: "/",            label: "Home" },
+    { href: "/twin",        label: "Cabinet twin" },
+    { href: "/greenhouse",  label: "Greenhouse twin" },
+    { href: "/system",      label: "System" },
+    { href: "/build",       label: "Build one" },
+    { href: "/pitch",       label: "Back it" }
   ];
 </script>
 

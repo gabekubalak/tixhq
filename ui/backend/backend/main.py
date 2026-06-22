@@ -148,6 +148,43 @@ def safety() -> dict:
     return {"safety_trip": state.safety_trip}
 
 
+@app.get("/api/profile")
+def profile() -> dict:
+    """Return the active site profile so the UI can label zones, hide
+    sections that don't apply, and adapt to the form factor. Best-effort:
+    if the loader or profile isn't installed, fall back to a minimal
+    indoor-cabinet shape so the UI still renders."""
+    try:
+        import sys as _sys
+        _sys.path.insert(0, "/opt/kratt/services/site-config")
+        from site_config import load_profile
+        p = load_profile()
+        return {
+            "name":        p.name,
+            "form_factor": p.form_factor,
+            "description": p.description,
+            "zones": [
+                {"id": z.id, "label": z.label, "type": z.type, "medium": z.medium}
+                for z in p.zones
+            ],
+            "has_composter":   p.has_composter(),
+            "has_auto_dosing": p.has_auto_dosing(),
+        }
+    except Exception as exc:
+        log.info("no profile available, returning fallback: %s", exc)
+        return {
+            "name": "cabinet-v1",
+            "form_factor": "appliance_cabinet",
+            "description": "fallback",
+            "zones": [
+                {"id": i, "label": f"Shelf {i}", "type": "shelf", "medium": "ebb_flow"}
+                for i in range(4)
+            ],
+            "has_composter": True,
+            "has_auto_dosing": True,
+        }
+
+
 @app.get("/api/recipes")
 def recipes() -> list[dict]:
     out = []
