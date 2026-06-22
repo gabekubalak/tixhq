@@ -112,26 +112,62 @@ can swap any line for a part you already have.
 | 10% contingency (parts always break the first time) | 130 |
 | **All-in V1 budget** | **~$1,450** |
 
-### Where you can cut cost
+### Three tiers, pick honestly
 
-If $1,450 is tight, here's the order to trim:
-1. **Skip the heater (-$90)** if you only run spring through fall.
-2. **Drop EC and pH probes (-$100)** for the first month. Mix nutrients
-   by hand; let the system prove itself first. Add probes later, same
-   wiring.
-3. **Start with two beds, not four (-$60).** Tubing, valves, channels
-   come down. Expand once the loop is proven.
-4. **Skip auto-vent openers (-$80)** if you'll be there daily to crack
-   the door.
+Each row is the all-in price for one greenhouse, after a 10% parts
+contingency. The integrity (safety, brain, offline-ness, real
+hydroponic loop) is the same at every tier. The differences are how
+much manual attention V1 still needs.
 
-Stripped-down V1: roughly **$1,120**. Still hydroponics + composter +
-offline brain. Just less automation around the edges.
+| Tier | Heater | Auto-dosing | Vent openers | Beds | Brain | Price |
+|------|:------:|:-----------:|:------------:|:----:|:-----:|------:|
+| **Pragmatic V1** | no | no, hand-mix | no, manual | 2 DWC totes | Pi 4 | **~$830** |
+| **Comfortable V1** | no | yes (EC + pH probes + dosing pumps) | yes (passive wax) | 2 DWC totes | Pi 4 | **~$1,150** |
+| **Premium V1** (the full spec above) | yes, year-round | yes | yes | 4 NFT beds | Pi 5 | **~$1,450** |
+
+### The cuts (in order of how much they save and why)
+
+**Real cuts (same function, cheaper part), take all of these:**
+- Pi 5 → Pi 4 (4 GB): -$55. Pi 4 runs the full greenhouse target.
+- Hammond IP65 → generic ABS IP65: -$25. Both block water and dust.
+- Skip the spare microSD: -$10. Not needed at install.
+- NFT channels → 27 gal DWC totes with net pots: -$30. DWC is arguably
+  more forgiving for V1: more thermal mass, no slope to tune, the loop
+  doesn't fail if the pump misses a cycle.
+- 25 L slurry drum → 5 gal food-grade bucket: -$22. Same volume class.
+- 200 mm exhaust → 140 mm 12 V PWM: -$20. Plenty of airflow for a
+  14x30 hoop.
+- 24 V/15 A PSU → 24 V/5 A: -$25. Right-sized once you drop the heater.
+- Ultrasonic level → float switch: -$10. Mechanical, never lies.
+
+**Deferrals (drop the feature for V1, add it later on the same wiring):**
+- Skip the heater (-$90): grow March through October. The reservoir is
+  thermal mass; a thermophilic composter is a heat source. Add the
+  heater in V1.1 if you want year-round.
+- Skip the auto-dosing rig (EC/pH probes + 5 dosing pumps): -$200.
+  Hand-mix nutrient solution every 1-2 weeks. The recirculation and
+  every other automation still runs. This is how most hobby
+  hydroponics already works.
+- Skip wax-cylinder vent openers: -$80. Crack the door manually on
+  hot days.
+- 4 beds → 2 beds: -$60. Fewer valves, less tubing.
+
+**Do NOT cut (real integrity, not nice-to-have):**
+- E-stop + 24 V contactor ($45): the difference between "glitch shut
+  off" and "glitch flooded the floor while a heater stayed on."
+- Outdoor GFCI outlet ($25): a greenhouse is water everywhere.
+- Drip-pan leak sensor ($5): cheapest part on the list, saves you
+  from a flood.
+- Hardware watchdog on the safety MCU ($3): catches a frozen brain.
+- Composter heater pad ($35) IF you're keeping the composter. Without
+  it, batches don't reach pathogen-kill temperature and you can't
+  safely feed the slurry to food crops.
 
 ---
 
 ## Build order (5 to 7 weekend-days)
 
-### Day 1 — power and the controller box (4 hours)
+### Day 1, power and the controller box (4 hours)
 1. Run a 12 ga outdoor cable from the house to the greenhouse. Land it
    on the IP65 GFCI outlet inside.
 2. Mount the IP65 enclosure on the inside wall, 1.5 m off the ground,
@@ -142,7 +178,7 @@ offline brain. Just less automation around the edges.
 4. Pre-wire the breaker, contactor, and E-stop loop so the contactor
    only stays closed when E-stop is healthy.
 
-### Day 2 — beds and plumbing (8 hours)
+### Day 2, beds and plumbing (8 hours)
 1. Set up the stock tank as the main reservoir, plumbed to the
    recirculation pump.
 2. Mount the four NFT channels on stands with a 1 in 40 slope toward
@@ -155,7 +191,7 @@ offline brain. Just less automation around the edges.
    and the mixing motor on top. Slurry dosing pump pulls from this
    tank into the reservoir.
 
-### Day 3 — sensors and wiring (5 hours)
+### Day 3, sensors and wiring (5 hours)
 1. Inside SHT41 in the geometric center of the greenhouse at canopy
    height. Outside SHT41 mounted under the eave for a reference
    reading.
@@ -170,7 +206,7 @@ offline brain. Just less automation around the edges.
 7. Land every analog and digital signal on the labeled terminal blocks
    in the enclosure. ESP32-S3 reads them all.
 
-### Day 4 — climate and composter (4 hours)
+### Day 4, climate and composter (4 hours)
 1. Mount the two wax-cylinder vent openers in the end-wall vents.
    They open passively at ~22 C. Zero wiring.
 2. Mount the 200 mm exhaust fan in the opposite end wall, on a 120 V
@@ -181,7 +217,7 @@ offline brain. Just less automation around the edges.
 5. Mount the composter drum outside (or in a cooler corner). Wire the
    heater pad and mixing motor back to the controller.
 
-### Day 5 — flash KrattOS and bring it up (3 hours)
+### Day 5, flash KrattOS and bring it up (3 hours)
 1. Flash the Pi:
    ```
    git clone <repo> && cd kratt
@@ -201,7 +237,7 @@ offline brain. Just less automation around the edges.
 5. Run the recirculation pump manually for ten minutes. Confirm flow
    in every channel.
 
-### Days 6 to 7 — planting and tuning (variable)
+### Days 6 to 7, planting and tuning (variable)
 1. Mix the first batch of nutrient solution to the recipe target EC
    and pH. (Until the composter has run a thermal cycle, you're
    feeding from store-bought nutrients.)

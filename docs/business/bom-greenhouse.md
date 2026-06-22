@@ -2,11 +2,20 @@
 
 The first real-world KrattOS deployment is an outdoor hoop house running
 hydroponics and a composter-fed nutrient loop, not the indoor appliance.
-Cost: **~$1,450 all-in for one V1 site**.
+Three honest tiers, depending on how much automation you want on day one.
+Every tier has the same safety + offline brain + dashboard + recipe
+engine; what scales is how hands-off it is.
+
+| Tier | Price | Manual attention |
+|------|------:|------------------|
+| **Pragmatic V1** | **~$830** | Mix nutrients every 1-2 weeks. Crack vents on hot days. No winter. |
+| **Comfortable V1** | **~$1,150** | Hands-off through summer. No winter. |
+| **Premium V1** | **~$1,450** | Year-round, hands-off. |
 
 The buildable spec, wiring, and assembly order are in
-`docs/hardware/greenhouse-v1.md`. This page is the at-a-glance number
-for fundraising materials.
+`docs/hardware/greenhouse-v1.md`, with the cut-by-cut breakdown.
+
+### Premium V1 (year-round, fully automated)
 
 | Section | $ |
 |---------|--:|
@@ -20,6 +29,18 @@ for fundraising materials.
 | 10% contingency | 130 |
 | **All-in** | **~$1,450** |
 
+### Pragmatic V1 (recommended starting point, ~$830)
+
+Same brain, same safety, same recipe engine. 2 DWC totes instead of 4
+NFT beds. Skip the heater (March-October growing). Skip auto-dosing
+(hand-mix every 1-2 weeks; the recirculation, watering, climate, and
+alerting still run themselves). Pi 4 instead of Pi 5. Smaller exhaust
+fan and PSU matched to the load. Float switch instead of ultrasonic.
+
+Savings vs Premium: about **$620**. Nothing safety-related lost. The
+full cut list with the reasoning is in
+`docs/hardware/greenhouse-v1.md`.
+
 What's NOT in this number: the greenhouse frame and plastic itself (the
 backer already has one), the wire from the house to the greenhouse if
 it's a long run, and the LED grow bars if you want supplemental
@@ -27,30 +48,35 @@ lighting (around $40 each).
 
 ## How it relates to the GoFundMe ask
 
-The $3,000 GoFundMe goal covers:
-- $1,450 for the greenhouse V1 build above
+The $3,000 GoFundMe now covers more than originally scoped:
+
+- $830 for the Pragmatic greenhouse V1 above
 - $400 for a parallel indoor proof unit (the Lite tier on a bench)
-- $500 for seeds, nutrient concentrate, hardware-store consumables,
-  spare parts
-- $250 contingency, shipping, platform fees
-- $400 left over goes straight into the SECOND greenhouse build, or
-  pre-builds a Lite kit for a backer
+- $320 to upgrade the greenhouse Pragmatic to Comfortable mid-campaign
+  once the loop works (adds the auto-dosing rig)
+- $500 for the seed library, nutrient concentrate, hardware-store
+  consumables, spare parts for both sites
+- $250 for shipping and platform fees
+- $700 contingency or a head start on the SECOND greenhouse build
 
-So the $3k buys a real outdoor deployment AND a controlled indoor bench
-proof, with the cheapest tier (Lite) also covered. The greenhouse is
-the hero footage; the indoor unit is the controlled comparison.
+So the same $3k now covers TWO real-world deployments (the greenhouse
+and the controlled indoor bench), with built-in headroom to upgrade
+the greenhouse once it proves itself or to start a second site for a
+backer who wants one.
 
-## Stripped-down V1 (~$1,120)
+## Why a heater isn't in Pragmatic V1
 
-If $1,450 isn't doable yet, the cuts in priority order:
-1. Skip the electric heater (-$90). Run spring through fall only.
-2. Drop EC/pH probes (-$100). Mix nutrients by hand for the first
-   month. Add the probes later on the same wiring.
-3. Start with two beds, not four (-$60). Tubing, valves, channels
-   come down. Expand once the loop is proven.
-4. Skip the wax-cylinder vent openers (-$80). Crack the door manually
-   on hot days.
+Plants stop growing below ~50 °F and freeze below 32 °F, so a heater
+is what would let you grow year-round in a cold climate. But two
+things buy you a lot of buffer for free:
 
-Still includes: the offline brain, the composter loop, the
-recirculation pump, four sensors, and the safety supervisor. That's a
-real KrattOS, just less automated around the edges.
+1. **The reservoir is thermal mass.** A 200 L tank of water holds ~4×
+   the heat of the same volume of concrete and slow-releases through
+   the night.
+2. **The composter is a heat source.** Thermophilic composting holds
+   130-160 °F for days. Routing the slurry return through a coil in
+   the composter is a free heat exchanger.
+
+So skip the heater for V1, run March through October, prove the loop
+works, and add the heater in V1.1 if you decide year-round is worth
+the electric bill.
