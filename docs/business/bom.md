@@ -53,13 +53,17 @@ Cabinet size and component placements are anchored in
 
 ## Composter subsystem
 
+Active aerobic composting is exothermic, so the pile heats itself.
+What we DO need is good aeration (so the microbes don't go anaerobic)
+and an insulated tank wall (so a 12 L batch retains the heat it
+generates).
+
 | # | Component | Single | @1k qty |
 |---|-----------|-------:|--------:|
 | 1 | Grinder motor + auger | $110 | $58 |
-| 1 | Heater pad, 200W, 24V | $35 | $18 |
-| 1 | Aeration pump | $28 | $14 |
-| 1 | Composter tank (food-grade, 12L) | $52 | $26 |
-| **Subtotal** | | **$225** | **$116** |
+| 1 | Aeration pump + diffuser | $28 | $14 |
+| 1 | Composter tank (food-grade, 12L, double-wall insulated) | $58 | $30 |
+| **Subtotal** | | **$196** | **$102** |
 
 ## Cabinet & enclosure
 
@@ -93,20 +97,20 @@ Cabinet size and component placements are anchored in
 | Compute & control | $667 | $395 |
 | Sensors           | $248 | $152 |
 | Actuators & plumbing | $911 | $540 |
-| Composter         | $225 | $116 |
+| Composter         | $196 | $102 |
 | Cabinet & enclosure | $519 | $270 |
 | Power             | $81  | $39  |
-| **Raw BOM**       | **$2,651** | **$1,512** |
+| **Raw BOM**       | **$2,622** | **$1,498** |
 | Assembly labour (3h @ $35) | $105 | $90 |
 | Packaging + accessories (seed-pod starter, manual, USB key) | $60 | $35 |
 | Warranty reserve (3% returns × repair cost) | $80 | $50 |
-| **Landed cost per unit** | **$2,896** | **$1,687** |
+| **Landed cost per unit** | **$2,867** | **$1,673** |
 
 ## Pricing implication
 
 - Target retail: **$4,499** (consumer) / **$3,999** (B2B fleet of 4+).
-- Gross margin at scale: **$2,312 / unit = 51%** at $4,499 retail.
-- Gross margin single-unit (year 1): **$1,603 / unit = 36%** at $4,499.
+- Gross margin at scale: **$2,326 / unit = 52%** at $4,499 retail.
+- Gross margin single-unit (year 1): **$1,632 / unit = 36%** at $4,499.
 
 ## Notes
 

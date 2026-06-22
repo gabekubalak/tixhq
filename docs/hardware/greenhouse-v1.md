@@ -79,12 +79,21 @@ can swap any line for a part you already have.
 | 1 | 200 mm exhaust fan, 120 VAC, with shutter | iLiving / VIVOSUN | 40 |
 | 1 | 120 mm 12 V circulation fan inside the greenhouse | Noctua / generic | 20 |
 
-### Composter, greenhouse scale ($95)
+### Composter, greenhouse scale ($90)
+
+Active aerobic composting is exothermic. Microbial breakdown of organic
+matter releases enough heat that a well-built pile self-heats to
+55-65 C and holds it for days, no electric heater required. What the
+drum DOES need is insulation (so a 40 L pile retains the heat it
+generates) and a small aquarium air pump for oxygen (a starved pile
+goes anaerobic and stops heating). The temperature gate stays the same;
+the heat just comes from biology instead of resistive wire.
 
 | # | Part | Source | $ |
 |--:|------|--------|--:|
 | 1 | 40 L food-grade drum with sealing lid | generic | 35 |
-| 1 | 200 W silicone heater pad, 24 V | generic | 35 |
+| 1 | Reflective bubble insulation jacket + foam-tape edges | generic | 15 |
+| 1 | 12 V air pump + bottom diffuser stone (aeration) | aquarium aisle | 15 |
 | 1 | Small 12 V geared motor for mixing auger | generic | 25 |
 
 ### Power and safety ($152)
@@ -106,11 +115,11 @@ can swap any line for a part you already have.
 | Sensors | 222 |
 | Actuators and plumbing | 393 |
 | Climate control | 230 |
-| Composter | 95 |
+| Composter | 90 |
 | Power and safety | 152 |
-| **Subtotal** | **1,322** |
+| **Subtotal** | **1,317** |
 | 10% contingency (parts always break the first time) | 130 |
-| **All-in V1 budget** | **~$1,450** |
+| **All-in V1 budget** | **~$1,445** |
 
 ### Three tiers, pick honestly
 
@@ -159,9 +168,12 @@ much manual attention V1 still needs.
 - Drip-pan leak sensor ($5): cheapest part on the list, saves you
   from a flood.
 - Hardware watchdog on the safety MCU ($3): catches a frozen brain.
-- Composter heater pad ($35) IF you're keeping the composter. Without
-  it, batches don't reach pathogen-kill temperature and you can't
-  safely feed the slurry to food crops.
+- Composter insulation + aeration ($30): if you're keeping the
+  composter, these are what make it actually thermophilic. The pile
+  generates its own heat from microbial activity, but only if it can
+  retain that heat (insulation) and breathe (aeration). Skip these
+  and a 40 L batch loses heat to ambient faster than it makes it,
+  never reaches 55 C, and the pathogen-kill gate never opens.
 
 ---
 
