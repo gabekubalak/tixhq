@@ -6,8 +6,10 @@ The full project is split by audience. Start here.
 - [`operator-manual/getting-started.md`](operator-manual/getting-started.md): unbox a KrattOS, set it up, run your first crop.
 
 ## If you want to build one (DIY)
-- [`hardware/krattos-lite.md`](hardware/krattos-lite.md): the budget tiers (Lite, ~$279 as a kit; Nano, ~$149). You bring a room, a wire rack, and trays. The kit ships the brain.
-- [`hardware/bom.md`](hardware/bom.md): the full appliance hardware spec.
+- [`hardware/greenhouse-v1.md`](hardware/greenhouse-v1.md): the V1 greenhouse build. 6 NFT beds, composter-fed hydroponics, ~$1,450 all-in. This is the first real-world KrattOS deployment.
+- [`hardware/krattos-lite.md`](hardware/krattos-lite.md): the budget tiers (Lite, ~$279 as a kit; Nano, ~$149). Bring a room, a wire rack, and trays. The kit ships the brain.
+- [`hardware/bom.md`](hardware/bom.md): the full indoor appliance hardware spec.
+- [`../profiles/README.md`](../profiles/README.md): how to write a site profile for your own shelves, beds, or hybrid setup.
 
 ## If you want to back the project
 - [`business/gofundme-copy.md`](business/gofundme-copy.md): the live $3,000 proof campaign.

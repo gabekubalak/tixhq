@@ -1,0 +1,85 @@
+# V1 deployment: 14 ft by 30 ft hoop house, 6 NFT hydroponic beds,
+# external composter feeding the central recirculation reservoir.
+# Natural sunlight does the lighting work, with one LED bar per bed for
+# winter and cloudy supplement. No hand-watering: every bed is on the
+# shared recirculation manifold.
+
+name: greenhouse-v1
+description: 14x30 ft hoop house, 6 NFT beds, composter-fed recirculation.
+form_factor: hoop_house
+
+zones:
+  - id: 0
+    label: North bed, west side
+    type: bed
+    medium: nft
+    dimensions: { width_m: 0.6, length_m: 3.0, depth_m: 0.10 }
+    lighting: { source: natural_plus_led, ppfd_target: 250, hours_on: 14, watts: 40 }
+    watering: { type: nft_recirc, pump: shared_manifold, valve_id: bed0 }
+    sensors:  [moisture, temp, humidity, ec]
+  - id: 1
+    label: North bed, east side
+    type: bed
+    medium: nft
+    dimensions: { width_m: 0.6, length_m: 3.0, depth_m: 0.10 }
+    lighting: { source: natural_plus_led, ppfd_target: 250, hours_on: 14, watts: 40 }
+    watering: { type: nft_recirc, pump: shared_manifold, valve_id: bed1 }
+    sensors:  [moisture, ec]
+  - id: 2
+    label: Middle bed, west side
+    type: bed
+    medium: nft
+    dimensions: { width_m: 0.6, length_m: 3.0, depth_m: 0.10 }
+    lighting: { source: natural_plus_led, ppfd_target: 250, hours_on: 14, watts: 40 }
+    watering: { type: nft_recirc, pump: shared_manifold, valve_id: bed2 }
+    sensors:  [moisture, ec]
+  - id: 3
+    label: Middle bed, east side
+    type: bed
+    medium: nft
+    dimensions: { width_m: 0.6, length_m: 3.0, depth_m: 0.10 }
+    lighting: { source: natural_plus_led, ppfd_target: 250, hours_on: 14, watts: 40 }
+    watering: { type: nft_recirc, pump: shared_manifold, valve_id: bed3 }
+    sensors:  [moisture, ec]
+  - id: 4
+    label: South bed, west side
+    type: bed
+    medium: nft
+    dimensions: { width_m: 0.6, length_m: 3.0, depth_m: 0.10 }
+    lighting: { source: natural_plus_led, ppfd_target: 250, hours_on: 14, watts: 40 }
+    watering: { type: nft_recirc, pump: shared_manifold, valve_id: bed4 }
+    sensors:  [moisture, ec]
+  - id: 5
+    label: South bed, east side
+    type: bed
+    medium: nft
+    dimensions: { width_m: 0.6, length_m: 3.0, depth_m: 0.10 }
+    lighting: { source: natural_plus_led, ppfd_target: 250, hours_on: 14, watts: 40 }
+    watering: { type: nft_recirc, pump: shared_manifold, valve_id: bed5 }
+    sensors:  [moisture, ec]
+
+manifold:
+  recirculation:      true
+  shared_reservoir:   true
+  reservoir_volume_l: 200
+  slurry_source:      composter
+  ec_probe:           true
+  ph_probe:           true
+  flow_meter:         true
+
+composter:
+  enabled:     true
+  capacity_l:  40
+  feed_method: kitchen_scraps
+
+climate:
+  enclosed: true
+  vent_control: { type: auto_wax, count: 2 }
+  heating:      { type: electric, watts: 1500, thermostat: software }
+  exhaust_fan:  { count: 1, watts: 80, control: thermostat }
+
+safety:
+  contactor:    true
+  e_stop:       true
+  watchdog_mcu: true
+  leak_sensors: 1

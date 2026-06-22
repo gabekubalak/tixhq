@@ -93,9 +93,22 @@ async def _on_vision(state: dict[int, ShelfState], msg) -> None:
     state[sid].last_vision_color_health = float(obs.get("color_health", 1.0))
 
 
-async def _publish_setpoint(nats: NATS, s: ShelfState, phase: dict) -> None:
+async def _publish_setpoint(nats: NATS, s: ShelfState, phase: dict, zone_cfg: dict | None = None) -> None:
+    """Publish a per-zone setpoint. When a site profile gives zone-level
+    lighting overrides (e.g. natural-light beds in a greenhouse), they
+    take precedence over the recipe's light block."""
     sp = phase["setpoints"]
     light = phase.get("light", {})
+    if zone_cfg and "lighting" in zone_cfg:
+        zl = zone_cfg["lighting"]
+        # Natural light: zero PPFD demand; the recipe is informative only.
+        if zl.get("source") == "natural":
+            light = {"ppfd": 0, "hours_on": 0}
+        else:
+            light = {
+                "ppfd":     zl.get("ppfd_target", light.get("ppfd", 0)),
+                "hours_on": zl.get("hours_on",    light.get("hours_on", 0)),
+            }
     payload = {
         "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "shelf_id": s.shelf_id,
@@ -151,6 +164,21 @@ async def amain() -> None:
     state = _load_state()
     recipes = {sid: _load_recipe(s.crop) for sid, s in state.items()}
 
+    # Optional: per-zone overrides from the active site profile (greenhouse
+    # beds may use natural light, etc). Best-effort: if the profile or
+    # loader isn't present, services keep working as before.
+    zone_cfgs: dict[int, dict] = {}
+    try:
+        import sys
+        sys.path.insert(0, "/opt/kratt/services/site-config")
+        from site_config import load_profile  # type: ignore
+        profile = load_profile()
+        for z in profile.zones:
+            zone_cfgs[z.id] = {"lighting": z.lighting, "watering": z.watering, "medium": z.medium}
+        log.info("loaded site profile %s (%d zones)", profile.name, len(profile.zones))
+    except Exception as exc:
+        log.info("no site profile loaded: %s", exc)
+
     await nats.subscribe(
         "kratt.vision.observation.*",
         cb=lambda m: asyncio.create_task(_on_vision(state, m)),
@@ -167,7 +195,7 @@ async def amain() -> None:
                 continue
             if _maybe_advance(s, r):
                 log.info("shelf %d -> phase %s", sid, r["phases"][s.phase_idx]["name"])
-            await _publish_setpoint(nats, s, r["phases"][s.phase_idx])
+            await _publish_setpoint(nats, s, r["phases"][s.phase_idx], zone_cfgs.get(sid))
             if not s.harvest_notified and _harvest_ready(s, r):
                 s.harvest_notified = True
                 await nats.publish(

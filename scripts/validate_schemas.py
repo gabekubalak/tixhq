@@ -22,6 +22,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 SCHEMA_DIR = ROOT / "schemas"
 RECIPE_DIR = ROOT / "recipes"
 CAD_DIR = ROOT / "cad"
+PROFILE_DIR = ROOT / "profiles"
 
 
 def _num_bounds(schema: dict, prop: str) -> tuple[float, float]:
@@ -84,13 +85,33 @@ def main() -> int:
         except Exception as e:
             errs.append(f"{cad_yaml_path}: {e}")
 
+    profiles: list[pathlib.Path] = sorted(PROFILE_DIR.glob("*.yaml")) if PROFILE_DIR.exists() else []
+    profile_schema = schemas.get("kratt.site.profile.schema")
+    for path in profiles:
+        try:
+            doc = yaml.safe_load(path.read_text())
+        except Exception as e:
+            errs.append(f"{path}: {e}")
+            continue
+        if profile_schema is None:
+            errs.append("missing kratt.site.profile.schema.json")
+            break
+        try:
+            jsonschema.Draft202012Validator(profile_schema).validate(doc)
+        except jsonschema.ValidationError as e:
+            errs.append(f"{path}: {e.message} at {list(e.absolute_path)}")
+        zone_ids = [z["id"] for z in doc.get("zones", [])]
+        if len(set(zone_ids)) != len(zone_ids):
+            errs.append(f"{path}: duplicate zone ids in {zone_ids}")
+
     if errs:
         for e in errs:
             print(f"FAIL: {e}", file=sys.stderr)
         return len(errs)
 
     cad_msg = ", cad/dimensions.yaml" if cad_validated else ""
-    print(f"OK: {len(schemas)} schemas, {len(recipes)} recipes{cad_msg}")
+    profile_msg = f", {len(profiles)} site profiles" if profiles else ""
+    print(f"OK: {len(schemas)} schemas, {len(recipes)} recipes{cad_msg}{profile_msg}")
     return 0
 
 

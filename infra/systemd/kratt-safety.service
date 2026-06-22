@@ -13,4 +13,4 @@ RestartSec=1
 WatchdogSec=5
 
 [Install]
-WantedBy=kratt.target kratt-lite.target
+WantedBy=kratt.target kratt-lite.target kratt-greenhouse.target

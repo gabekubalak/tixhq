@@ -1,4 +1,5 @@
-.PHONY: help verify rust-check rust-build rust-test python-check schemas sim clean
+.PHONY: help verify rust-check rust-build rust-test python-check schemas sim clean \
+        install-greenhouse-v1 install-cabinet-v1 install-shelf-mini-v1
 
 help:  ## Show this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?##/ {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -29,3 +30,12 @@ clean: ## Remove build artifacts
 	cargo clean
 	find . -type d -name __pycache__ -prune -exec rm -rf {} +
 	rm -rf ui/frontend/node_modules ui/frontend/.svelte-kit ui/frontend/build
+
+install-greenhouse-v1: ## Install KrattOS as a greenhouse (Pi or Linux box)
+	@bash scripts/install_profile.sh greenhouse-v1
+
+install-cabinet-v1: ## Install KrattOS as the full indoor appliance
+	@bash scripts/install_profile.sh cabinet-v1
+
+install-shelf-mini-v1: ## Install KrattOS as a single-shelf Nano
+	@bash scripts/install_profile.sh shelf-mini-v1

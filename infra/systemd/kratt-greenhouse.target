@@ -1,0 +1,32 @@
+[Unit]
+# Greenhouse deployment of KrattOS: outdoor hoop house or greenhouse,
+# multiple hydroponic beds on a shared recirculation manifold, the
+# composter loop feeding the slurry tank.
+#
+# Same codebase as the full cabinet, scoped to the services a real
+# greenhouse needs. Runs on a Raspberry Pi 4/5; the vision pipeline
+# (which expects a fixed-frame cabinet camera) is intentionally not
+# part of this target.
+#
+# Set the site profile before enabling:
+#   echo 'KRATT_PROFILE=greenhouse-v1' >> /etc/default/kratt
+#
+# Enable:
+#   systemctl enable --now kratt-greenhouse.target
+Description=KrattOS Greenhouse (hydroponic beds + composter)
+Requires=multi-user.target
+After=multi-user.target
+Wants=kratt-bus.service \
+      kratt-sensor-ingest.service \
+      kratt-recipe.service \
+      kratt-scheduler.service \
+      kratt-control.service \
+      kratt-mixer.service \
+      kratt-composter.service \
+      kratt-safety.service \
+      kratt-planner.service \
+      kratt-alerting.service \
+      kratt-ui.service
+
+[Install]
+WantedBy=multi-user.target

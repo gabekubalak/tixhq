@@ -21,6 +21,13 @@ useful. See [`docs/hardware/krattos-lite.md`](docs/hardware/krattos-lite.md)
 for the build philosophy and [`docs/README.md`](docs/README.md) for the
 full documentation map.
 
+The same brain runs in a **greenhouse** too. The V1 outdoor build is a
+14x30 ft hoop house, six NFT hydroponic beds on a shared composter-fed
+recirculation manifold, no hand-watering, ~$1,450 in parts. Buildable
+spec: [`docs/hardware/greenhouse-v1.md`](docs/hardware/greenhouse-v1.md).
+Whatever you bring (shelves, beds, channels), KrattOS reads its **site
+profile** ([`profiles/`](profiles/)) and adapts.
+
 We're currently running a **$3,000 GoFundMe** to fund the first proof
 unit: see [`docs/business/gofundme-copy.md`](docs/business/gofundme-copy.md).
 

@@ -1,0 +1,32 @@
+# Smallest possible KrattOS deployment: one wire shelf in a corner
+# somewhere, single LED bar, one tray, manual nutrient top-ups.
+# This is what a $149 Nano kit drives.
+
+name: shelf-mini-v1
+description: One wire shelf, one tray, ESP32-only, manual nutrients.
+form_factor: wire_rack
+
+zones:
+  - id: 0
+    label: Single shelf
+    type: shelf
+    medium: ebb_flow
+    dimensions: { width_m: 0.6, length_m: 0.45, depth_m: 0.06 }
+    lighting: { source: led_bar, ppfd_target: 200, hours_on: 16, watts: 40 }
+    watering: { type: shelf_drip, pump: shared_manifold }
+    sensors:  [moisture, temp, humidity]
+
+manifold:
+  recirculation:      true
+  shared_reservoir:   true
+  reservoir_volume_l: 8
+  slurry_source:      external_only
+  ec_probe:           false
+  ph_probe:           false
+  flow_meter:         false
+
+# No composter, no auto-dosing, no climate control.
+# A small fan can be added if heat builds up, but it's optional.
+composter: { enabled: false }
+climate:   { enclosed: false }
+safety:    { contactor: false, e_stop: false, watchdog_mcu: true, leak_sensors: 1 }

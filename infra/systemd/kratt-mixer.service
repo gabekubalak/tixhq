@@ -11,4 +11,4 @@ Restart=always
 RestartSec=2
 
 [Install]
-WantedBy=kratt.target
+WantedBy=kratt.target kratt-greenhouse.target

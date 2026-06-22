@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kratt.site.profile",
+  "title": "KrattOS site profile",
+  "description": "Declarative description of a single physical KrattOS deployment. Services read this to know what 'zone 0' actually is: a shelf in a cabinet, a bed in a greenhouse, an NFT channel in a basement, etc. One profile per running KrattOS instance, pointed at by KRATT_PROFILE.",
+  "type": "object",
+  "required": ["name", "form_factor", "zones", "manifold"],
+  "additionalProperties": false,
+  "properties": {
+    "name":         { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "description":  { "type": "string" },
+    "form_factor":  { "enum": ["appliance_cabinet", "wire_rack", "hoop_house", "greenhouse", "basement", "outdoor_row"] },
+    "cad":          { "type": "string", "description": "Optional path to a detailed CAD YAML for the 3D twin" },
+    "zones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "medium", "lighting", "watering"],
+        "additionalProperties": false,
+        "properties": {
+          "id":     { "type": "integer", "minimum": 0 },
+          "label":  { "type": "string" },
+          "type":   { "enum": ["shelf", "bed", "tray", "channel"] },
+          "medium": { "enum": ["soil", "coco", "rockwool", "nft", "dwc", "ebb_flow", "drip"] },
+          "dimensions": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "width_m":  { "type": "number", "exclusiveMinimum": 0 },
+              "length_m": { "type": "number", "exclusiveMinimum": 0 },
+              "depth_m":  { "type": "number", "exclusiveMinimum": 0 }
+            }
+          },
+          "lighting": {
+            "type": "object",
+            "required": ["source"],
+            "additionalProperties": false,
+            "properties": {
+              "source":       { "enum": ["led_panel", "led_bar", "natural", "natural_plus_led"] },
+              "ppfd_target":  { "type": "number", "minimum": 0,    "maximum": 2000 },
+              "hours_on":     { "type": "number", "minimum": 0,    "maximum": 24 },
+              "watts":        { "type": "number", "minimum": 0 }
+            }
+          },
+          "watering": {
+            "type": "object",
+            "required": ["type"],
+            "additionalProperties": false,
+            "properties": {
+              "type":     { "enum": ["shelf_drip", "nft_recirc", "dwc_static", "bed_drip", "ebb_flow", "manual"] },
+              "pump":     { "enum": ["shared_manifold", "per_zone", "none"] },
+              "valve_id": { "type": "string", "description": "Which manifold valve gates this zone" }
+            }
+          },
+          "sensors": {
+            "type": "array",
+            "items": { "enum": ["moisture", "temp", "humidity", "ec", "ph", "lux", "par", "level", "leak"] }
+          }
+        }
+      }
+    },
+    "manifold": {
+      "type": "object",
+      "required": ["recirculation"],
+      "additionalProperties": false,
+      "properties": {
+        "recirculation":      { "type": "boolean" },
+        "shared_reservoir":   { "type": "boolean" },
+        "reservoir_volume_l": { "type": "number", "exclusiveMinimum": 0 },
+        "slurry_source":      { "enum": ["composter", "external_only", "none"] },
+        "ec_probe":           { "type": "boolean" },
+        "ph_probe":            { "type": "boolean" },
+        "flow_meter":         { "type": "boolean" }
+      }
+    },
+    "composter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled":              { "type": "boolean" },
+        "capacity_l":           { "type": "number", "exclusiveMinimum": 0 },
+        "feed_method":          { "enum": ["kitchen_scraps", "scheduled_drop", "manual"] }
+      }
+    },
+    "climate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enclosed":     { "type": "boolean", "description": "Cabinet or greenhouse; false for outdoor" },
+        "vent_control": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type":  { "enum": ["auto_wax", "motorized", "manual", "none"] },
+            "count": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "heating": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type":       { "enum": ["electric", "propane", "none"] },
+            "watts":      { "type": "number", "minimum": 0 },
+            "thermostat": { "enum": ["software", "hardware", "none"] }
+          }
+        },
+        "exhaust_fan": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "count":   { "type": "integer", "minimum": 0 },
+            "watts":   { "type": "number", "minimum": 0 },
+            "control": { "enum": ["thermostat", "humidistat", "scheduled", "none"] }
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contactor":        { "type": "boolean" },
+        "e_stop":           { "type": "boolean" },
+        "watchdog_mcu":     { "type": "boolean" },
+        "leak_sensors":     { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+# The original KrattOS appliance: indoor cabinet, 4 shelves, integrated
+# composter, edge-AI brain. This is what "Full tier" deploys.
+
+name: cabinet-v1
+description: Indoor fridge-sized appliance, 4 lit shelves, composter loop.
+form_factor: appliance_cabinet
+cad: cad/dimensions.yaml
+
+zones:
+  - id: 0
+    label: Top shelf
+    type: shelf
+    medium: ebb_flow
+    dimensions: { width_m: 0.58, length_m: 0.52, depth_m: 0.06 }
+    lighting: { source: led_panel, ppfd_target: 240, hours_on: 16, watts: 80 }
+    watering: { type: shelf_drip, pump: shared_manifold, valve_id: shelf0 }
+    sensors:  [moisture, temp, humidity]
+  - id: 1
+    label: Upper-middle shelf
+    type: shelf
+    medium: ebb_flow
+    dimensions: { width_m: 0.58, length_m: 0.52, depth_m: 0.06 }
+    lighting: { source: led_panel, ppfd_target: 240, hours_on: 16, watts: 80 }
+    watering: { type: shelf_drip, pump: shared_manifold, valve_id: shelf1 }
+    sensors:  [moisture, temp, humidity]
+  - id: 2
+    label: Lower-middle shelf
+    type: shelf
+    medium: ebb_flow
+    dimensions: { width_m: 0.58, length_m: 0.52, depth_m: 0.06 }
+    lighting: { source: led_panel, ppfd_target: 240, hours_on: 16, watts: 80 }
+    watering: { type: shelf_drip, pump: shared_manifold, valve_id: shelf2 }
+    sensors:  [moisture, temp, humidity]
+  - id: 3
+    label: Bottom shelf
+    type: shelf
+    medium: ebb_flow
+    dimensions: { width_m: 0.58, length_m: 0.52, depth_m: 0.06 }
+    lighting: { source: led_panel, ppfd_target: 240, hours_on: 16, watts: 80 }
+    watering: { type: shelf_drip, pump: shared_manifold, valve_id: shelf3 }
+    sensors:  [moisture, temp, humidity]
+
+manifold:
+  recirculation:      true
+  shared_reservoir:   true
+  reservoir_volume_l: 12
+  slurry_source:      composter
+  ec_probe:           true
+  ph_probe:           true
+  flow_meter:         true
+
+composter:
+  enabled:     true
+  capacity_l:  12
+  feed_method: kitchen_scraps
+
+climate:
+  enclosed: true
+  vent_control: { type: motorized, count: 1 }
+  exhaust_fan:  { count: 1, watts: 12, control: thermostat }
+
+safety:
+  contactor:    true
+  e_stop:       true
+  watchdog_mcu: true
+  leak_sensors: 1
