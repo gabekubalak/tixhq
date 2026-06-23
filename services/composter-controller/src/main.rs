@@ -54,6 +54,24 @@ struct StateMsg<'a> {
     probes_healthy: usize,
     thermo_hold_seconds: u64,
     pathogen_kill_ok: bool,
+    /// Coarse estimate of slurry-tank EC based on phase. The BOM doesn't
+    /// include a slurry-tank EC probe; the mixer uses this estimate to
+    /// decide whether slurry is strong enough to be the EC source. Real
+    /// values come from the manifold probe once slurry mixes into the
+    /// chamber.
+    slurry_ec_est: f64,
+}
+
+fn slurry_ec_estimate(phase: Phase, pathogen_kill_ok: bool) -> f64 {
+    // Cure and TankReady slurry that has cleared the kill gate is
+    // typically ~1.8-2.2 mS/cm in V1 testing. Anything before the gate
+    // is treated as not-yet-strong-enough so the mixer falls through to
+    // base nutrients. Dispensing draws down the tank but for V1 we don't
+    // model the level effect.
+    match (phase, pathogen_kill_ok) {
+        (Phase::Cure | Phase::TankReady | Phase::Dispensing, true) => 1.9,
+        _ => 0.0,
+    }
 }
 
 fn now_iso() -> String {
@@ -249,6 +267,7 @@ async fn main() -> Result<()> {
                 probes_healthy: healthy_count,
                 thermo_hold_seconds: b.thermo_accumulated.as_secs(),
                 pathogen_kill_ok: b.pathogen_kill_ok,
+                slurry_ec_est: slurry_ec_estimate(b.phase, b.pathogen_kill_ok),
             };
             let bytes = serde_json::to_vec(&msg)?;
             let current = b.to_persistent();

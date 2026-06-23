@@ -17,6 +17,7 @@
     "probes_healthy": { "type": "integer", "minimum": 0, "description": "Number of probes currently reporting fresh, non-stuck readings." },
     "phase_started": { "type": "string", "format": "date-time" },
     "thermo_hold_seconds": { "type": "integer", "minimum": 0 },
-    "pathogen_kill_ok":    { "type": "boolean" }
+    "pathogen_kill_ok":    { "type": "boolean" },
+    "slurry_ec_est":       { "type": "number", "minimum": 0, "maximum": 5, "description": "Coarse phase-based estimate of slurry-tank EC in mS/cm. The mixer uses this to decide whether slurry is the right EC source." }
   }
 }
