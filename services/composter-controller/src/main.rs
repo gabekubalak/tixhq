@@ -16,6 +16,7 @@
 //! safety MCU on `pathogen_kill_ok`.
 
 use std::fs;
+use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -92,35 +93,57 @@ fn load_state() -> Option<PersistentBatch> {
     serde_json::from_slice(&body).ok()
 }
 
-/// Append-only audit log per batch. One JSON object per line.
-fn audit_append(b: &Batch, now: Instant, ts: &str) -> Result<()> {
-    let dir = audit_dir();
-    fs::create_dir_all(&dir).ok();
-    let path = dir.join(format!("composter-{}.log", b.id));
-    let eff = b.effective_temp(now);
-    let aeration_expected = matches!(b.phase, Phase::Mesophilic | Phase::Thermophilic);
-    let row = AuditRow {
-        ts,
-        batch_id: &b.id,
-        phase: b.phase,
-        effective_c: eff,
-        probes: b.probes.iter()
-            .map(|(id, p)| (id.clone(), p.value, p.is_healthy(now)))
-            .collect(),
-        aeration_ok: b.aeration.is_healthy(now, aeration_expected),
-        thermo_hold_seconds: b.thermo_accumulated.as_secs(),
-        pathogen_kill_ok: b.pathogen_kill_ok,
-    };
-    let mut line = serde_json::to_vec(&row).context("audit serialize")?;
-    line.push(b'\n');
-    use std::io::Write;
-    let mut f = fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(&path)
-        .with_context(|| format!("open audit log {:?}", path))?;
-    f.write_all(&line)?;
-    Ok(())
+/// Holds an open append-handle to the per-batch audit log, reopening it
+/// when the active batch changes. Keeping the handle open across ticks
+/// avoids ~8,640 file-open syscalls per day per composter and the SD
+/// write amplification that comes with them.
+struct AuditWriter {
+    handle: Option<(String, fs::File)>,
+}
+
+impl AuditWriter {
+    fn new() -> Self { Self { handle: None } }
+
+    fn ensure(&mut self, batch_id: &str) -> Result<&mut fs::File> {
+        let needs_open = match &self.handle {
+            Some((id, _)) => id != batch_id,
+            None => true,
+        };
+        if needs_open {
+            let dir = audit_dir();
+            fs::create_dir_all(&dir).ok();
+            let path = dir.join(format!("composter-{}.log", batch_id));
+            let f = fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&path)
+                .with_context(|| format!("open audit log {:?}", path))?;
+            self.handle = Some((batch_id.to_string(), f));
+        }
+        Ok(&mut self.handle.as_mut().unwrap().1)
+    }
+
+    fn write_row(&mut self, b: &Batch, now: Instant, ts: &str) -> Result<()> {
+        let eff = b.effective_temp(now);
+        let aeration_expected = matches!(b.phase, Phase::Mesophilic | Phase::Thermophilic);
+        let row = AuditRow {
+            ts,
+            batch_id: &b.id,
+            phase: b.phase,
+            effective_c: eff,
+            probes: b.probes.iter()
+                .map(|(id, p)| (id.clone(), p.value, p.is_healthy(now)))
+                .collect(),
+            aeration_ok: b.aeration.is_healthy(now, aeration_expected),
+            thermo_hold_seconds: b.thermo_accumulated.as_secs(),
+            pathogen_kill_ok: b.pathogen_kill_ok,
+        };
+        let mut line = serde_json::to_vec(&row).context("audit serialize")?;
+        line.push(b'\n');
+        let f = self.ensure(&b.id)?;
+        f.write_all(&line)?;
+        Ok(())
+    }
 }
 
 #[tokio::main]
@@ -184,12 +207,26 @@ async fn main() -> Result<()> {
                 ("dispense_done", Phase::Dispensing) => {
                     b.phase = Phase::TankReady;
                 }
+                // Cancel discards the batch and returns to Idle. Without
+                // this, a TankReady batch had no exit path and the
+                // composter was stuck after one cycle. Allowed from any
+                // phase, including mid-thermophilic if the operator
+                // realizes a batch is bad (e.g. wrong material loaded).
+                ("cancel", _) => {
+                    tracing::warn!("composter batch cancelled from phase {:?}", b.phase);
+                    *b = Batch::new(uuid::Uuid::new_v4().to_string(), now, iso);
+                }
                 _ => {}
             }
         }
     });
 
     // Publisher / advancer: every 10 s, tick the FSM, persist, audit, emit.
+    let mut audit = AuditWriter::new();
+    // Track the previous persisted snapshot so we only save when something
+    // safety-relevant actually changed. Cuts ~17k SD writes/day per unit
+    // to a handful per phase.
+    let mut last_persisted: Option<PersistentBatch> = None;
     let mut tick = tokio::time::interval(Duration::from_secs(10));
     loop {
         tick.tick().await;
@@ -214,12 +251,28 @@ async fn main() -> Result<()> {
                 pathogen_kill_ok: b.pathogen_kill_ok,
             };
             let bytes = serde_json::to_vec(&msg)?;
-            save_state(&b.to_persistent());
-            if let Err(e) = audit_append(&b, now, &iso) {
+            let current = b.to_persistent();
+            if persistence_should_write(last_persisted.as_ref(), &current) {
+                save_state(&current);
+                last_persisted = Some(current);
+            }
+            if let Err(e) = audit.write_row(&b, now, &iso) {
                 tracing::warn!("audit log write failed: {}", e);
             }
             bytes
         };
         client.publish("kratt.composter.state", snapshot.into()).await?;
     }
+}
+
+/// Only re-persist when something safety-relevant has changed: a new
+/// batch, a phase transition, the pathogen-kill flag flipping, or the
+/// thermo accumulator crossing a full minute. The audit log captures
+/// every tick separately; this just protects the SD card.
+fn persistence_should_write(prev: Option<&PersistentBatch>, cur: &PersistentBatch) -> bool {
+    let Some(p) = prev else { return true };
+    p.id != cur.id
+        || p.phase != cur.phase
+        || p.pathogen_kill_ok != cur.pathogen_kill_ok
+        || (cur.thermo_accumulated_seconds / 60) != (p.thermo_accumulated_seconds / 60)
 }

@@ -105,11 +105,16 @@ impl AerationState {
 
 /// Persistent slice of the batch. Survives controller restarts via JSON
 /// on disk. Excludes Instant fields, which are recomputed at startup.
+/// `phase_elapsed_seconds` lets us reconstruct phase_started across a
+/// restart so e.g. the 24 h cure timer doesn't get reset by a kratt
+/// reboot at hour 23.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PersistentBatch {
     pub id: String,
     pub phase: Phase,
     pub phase_started_iso: String,
+    #[serde(default)]
+    pub phase_elapsed_seconds: u64,
     pub thermo_accumulated_seconds: u64,
     pub pathogen_kill_ok: bool,
 }
@@ -143,10 +148,16 @@ impl Batch {
     }
 
     pub fn from_persistent(p: PersistentBatch, now: Instant) -> Self {
+        // Reconstruct phase_started by walking backwards from `now` by the
+        // persisted elapsed seconds. This preserves the grinding and cure
+        // timers across a restart so a kratt reboot at hour 23 of cure
+        // doesn't reset the clock and add another 24 h of waiting.
+        let elapsed = Duration::from_secs(p.phase_elapsed_seconds);
+        let phase_started = now.checked_sub(elapsed).unwrap_or(now);
         Self {
             id: p.id,
             phase: p.phase,
-            phase_started: now, // We've lost wall-clock alignment; restart the phase timer fresh
+            phase_started,
             phase_started_iso: p.phase_started_iso,
             thermo_accumulated: Duration::from_secs(p.thermo_accumulated_seconds),
             last_eval: now,
@@ -161,6 +172,7 @@ impl Batch {
             id: self.id.clone(),
             phase: self.phase,
             phase_started_iso: self.phase_started_iso.clone(),
+            phase_elapsed_seconds: self.phase_started.elapsed().as_secs(),
             thermo_accumulated_seconds: self.thermo_accumulated.as_secs(),
             pathogen_kill_ok: self.pathogen_kill_ok,
         }
@@ -390,5 +402,26 @@ mod tests {
         assert_eq!(restored.thermo_accumulated.as_secs(), 36 * 3600);
         // Probes are NOT restored: gate stays closed until probes report again
         assert!(restored.effective_temp(Instant::now()).is_none());
+    }
+
+    #[test]
+    fn persistence_preserves_phase_elapsed_so_cure_timer_doesnt_reset() {
+        let t0 = Instant::now();
+        let mut b = Batch::new("xyz".into(), t0, iso("t0"));
+        b.phase = Phase::Cure;
+        // Force phase_started to be 23 hours in the past
+        b.phase_started = t0
+            .checked_sub(Duration::from_secs(23 * 3600))
+            .unwrap_or(t0);
+        let p = b.to_persistent();
+        // Sanity: we persisted ~23 h of elapsed phase time
+        assert!(p.phase_elapsed_seconds >= 23 * 3600 - 1);
+        assert!(p.phase_elapsed_seconds <= 23 * 3600 + 1);
+        // Restore at "now" and confirm the elapsed wasn't lost
+        let now = Instant::now();
+        let restored = Batch::from_persistent(p, now);
+        let elapsed = restored.phase_started.elapsed().as_secs();
+        // Should be ~23 h, not ~0
+        assert!(elapsed >= 23 * 3600 - 1, "elapsed = {} h", elapsed / 3600);
     }
 }
