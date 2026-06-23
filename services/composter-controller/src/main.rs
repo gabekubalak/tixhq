@@ -1,78 +1,40 @@
-//! Composter state machine.
+//! Composter controller binary. Drives the FSM in `composter_controller::lib`
+//! against live NATS sensor data, persists batch state to disk so a restart
+//! doesn't lose progress, and writes an append-only audit log per batch.
 //!
-//!   idle
-//!     │ user loads hopper, presses "start"
-//!     ▼
-//!   grinding (motor on, brief)
-//!     ▼
-//!   mesophilic (40–50 °C, aeration duty cycle)
-//!     ▼
-//!   thermophilic (≥55 °C held continuously for ≥72 h — pathogen kill)
-//!     ▼
-//!   cure (passive, until slurry tank EC stabilizes)
-//!     ▼
-//!   tank_ready
-//!     │ mixer asks for slurry
-//!     ▼
-//!   dispensing → back to tank_ready until empty → idle
+//! Subscribes:
+//!   kratt.composter.sensor.*       per-probe temperatures + aeration_lpm
+//!   kratt.composter.command        operator start / dispense
 //!
-//! The pathogen-kill gate is a HARD safety interlock: until the controller
-//! has logged the required thermophilic hold for THIS batch, the slurry
-//! tank's output valve refuses to open.
+//! Publishes every 10 s:
+//!   kratt.composter.state          phase, temps, audit fields
+//!
+//! The pathogen-kill gate is hard: it only flips when at least two healthy
+//! probes report effective temperature >=55 C for 72 cumulative hours with
+//! aeration flowing. Probe stale, probe stuck, or aeration silent all
+//! pause the accumulator. The slurry valve is gated separately by the
+//! safety MCU on `pathogen_kill_ok`.
 
+use std::fs;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
+use composter_controller::*;
 use futures_util::StreamExt;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 use tokio::sync::Mutex;
 
-const THERMO_MIN_C: f64 = 55.0;
-const THERMO_HOLD: Duration = Duration::from_secs(72 * 3600);
-const MESO_MIN_C: f64 = 40.0;
-
-#[derive(Debug, Clone, Copy, Serialize)]
-#[serde(rename_all = "snake_case")]
-enum Phase {
-    Idle,
-    Grinding,
-    Mesophilic,
-    Thermophilic,
-    Cure,
-    TankReady,
-    Dispensing,
-}
-
-struct Batch {
-    id: String,
-    phase: Phase,
-    phase_started: Instant,
-    thermo_accumulated: Duration,
-    last_temp: f64,
-    last_eval: Instant,
-    pathogen_kill_ok: bool,
-}
-
-impl Batch {
-    fn new() -> Self {
-        let now = Instant::now();
-        Self {
-            id: uuid::Uuid::new_v4().to_string(),
-            phase: Phase::Idle,
-            phase_started: now,
-            thermo_accumulated: Duration::ZERO,
-            last_temp: 20.0,
-            last_eval: now,
-            pathogen_kill_ok: false,
-        }
-    }
-}
+const STATE_PATH: &str = "/var/lib/kratt/composter-batch.json";
+const AUDIT_DIR: &str = "/var/log/kratt";
 
 #[derive(Deserialize)]
 struct CompostSensor {
     kind: String,
     value: f64,
+    probe_id: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -85,8 +47,10 @@ struct StateMsg<'a> {
     ts: String,
     batch_id: &'a str,
     phase: Phase,
-    temp_c: f64,
+    temp_c: Option<f64>,            // effective (min of healthy probes)
     aeration_duty_pct: f64,
+    aeration_ok: bool,
+    probes_healthy: usize,
     thermo_hold_seconds: u64,
     pathogen_kill_ok: bool,
 }
@@ -97,38 +61,66 @@ fn now_iso() -> String {
         .unwrap()
 }
 
-fn advance(b: &mut Batch) {
-    let now = Instant::now();
-    let dt = now.duration_since(b.last_eval);
-    b.last_eval = now;
+fn state_path() -> PathBuf {
+    PathBuf::from(std::env::var("KRATT_COMPOSTER_STATE").unwrap_or_else(|_| STATE_PATH.into()))
+}
 
-    match b.phase {
-        Phase::Grinding if b.phase_started.elapsed() >= Duration::from_secs(120) => {
-            b.phase = Phase::Mesophilic;
-            b.phase_started = now;
-        }
-        Phase::Mesophilic if b.last_temp >= THERMO_MIN_C => {
-            b.phase = Phase::Thermophilic;
-            b.phase_started = now;
-        }
-        Phase::Thermophilic => {
-            if b.last_temp >= THERMO_MIN_C {
-                b.thermo_accumulated += dt;
-            } else if b.last_temp < MESO_MIN_C {
-                b.phase = Phase::Mesophilic;
-                b.phase_started = now;
-            }
-            if b.thermo_accumulated >= THERMO_HOLD {
-                b.pathogen_kill_ok = true;
-                b.phase = Phase::Cure;
-                b.phase_started = now;
-            }
-        }
-        Phase::Cure if b.phase_started.elapsed() >= Duration::from_secs(24 * 3600) => {
-            b.phase = Phase::TankReady;
-        }
-        _ => {}
+fn audit_dir() -> PathBuf {
+    PathBuf::from(std::env::var("KRATT_AUDIT_DIR").unwrap_or_else(|_| AUDIT_DIR.into()))
+}
+
+/// Best-effort persistence: write the JSON if the directory exists or can be
+/// created. If we can't write, log and continue; we'd rather operate without
+/// persistence than refuse to run.
+fn save_state(p: &PersistentBatch) {
+    let path = state_path();
+    if let Some(parent) = path.parent() {
+        let _ = fs::create_dir_all(parent);
     }
+    let body = match serde_json::to_vec_pretty(p) {
+        Ok(b) => b,
+        Err(e) => { tracing::warn!("composter state serialize failed: {}", e); return; }
+    };
+    if let Err(e) = fs::write(&path, body) {
+        tracing::warn!("composter state write failed: {}", e);
+    }
+}
+
+fn load_state() -> Option<PersistentBatch> {
+    let path = state_path();
+    let body = fs::read(&path).ok()?;
+    serde_json::from_slice(&body).ok()
+}
+
+/// Append-only audit log per batch. One JSON object per line.
+fn audit_append(b: &Batch, now: Instant, ts: &str) -> Result<()> {
+    let dir = audit_dir();
+    fs::create_dir_all(&dir).ok();
+    let path = dir.join(format!("composter-{}.log", b.id));
+    let eff = b.effective_temp(now);
+    let aeration_expected = matches!(b.phase, Phase::Mesophilic | Phase::Thermophilic);
+    let row = AuditRow {
+        ts,
+        batch_id: &b.id,
+        phase: b.phase,
+        effective_c: eff,
+        probes: b.probes.iter()
+            .map(|(id, p)| (id.clone(), p.value, p.is_healthy(now)))
+            .collect(),
+        aeration_ok: b.aeration.is_healthy(now, aeration_expected),
+        thermo_hold_seconds: b.thermo_accumulated.as_secs(),
+        pathogen_kill_ok: b.pathogen_kill_ok,
+    };
+    let mut line = serde_json::to_vec(&row).context("audit serialize")?;
+    line.push(b'\n');
+    use std::io::Write;
+    let mut f = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&path)
+        .with_context(|| format!("open audit log {:?}", path))?;
+    f.write_all(&line)?;
+    Ok(())
 }
 
 #[tokio::main]
@@ -136,36 +128,58 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt().init();
     let nats_url = std::env::var("NATS_URL").unwrap_or_else(|_| "127.0.0.1:4222".into());
     let client = async_nats::connect(nats_url.as_str()).await?;
-    let batch: Arc<Mutex<Batch>> = Arc::new(Mutex::new(Batch::new()));
 
-    // Subscriber: latest temperature feeds the state machine.
-    let batch_t = batch.clone();
+    let now = Instant::now();
+    let iso = now_iso();
+    let batch = match load_state() {
+        Some(p) => {
+            tracing::info!("resumed batch {} at phase {:?}, {}s accumulated",
+                p.id, p.phase, p.thermo_accumulated_seconds);
+            Batch::from_persistent(p, now)
+        }
+        None => Batch::new(uuid::Uuid::new_v4().to_string(), now, iso),
+    };
+    let batch: Arc<Mutex<Batch>> = Arc::new(Mutex::new(batch));
+
+    // Subscriber: per-probe temperatures + aeration flow.
+    let batch_s = batch.clone();
     let mut sub = client.subscribe("kratt.composter.sensor.*").await?;
     tokio::spawn(async move {
         while let Some(msg) = sub.next().await {
             let Ok(m) = serde_json::from_slice::<CompostSensor>(&msg.payload) else { continue };
-            if m.kind == "temp" {
-                batch_t.lock().await.last_temp = m.value;
+            let now = Instant::now();
+            let mut b = batch_s.lock().await;
+            match m.kind.as_str() {
+                "temp" => {
+                    let id = m.probe_id.unwrap_or_else(|| "a".into());
+                    b.observe_probe(&id, m.value, now);
+                }
+                "aeration_lpm" | "aeration_duty" => {
+                    b.observe_aeration(m.value, now);
+                }
+                _ => {}
             }
         }
     });
 
-    // Subscriber: operator commands (start a batch / dispense slurry).
+    // Subscriber: operator commands.
     let batch_c = batch.clone();
     let mut sub_cmd = client.subscribe("kratt.composter.command").await?;
     tokio::spawn(async move {
         while let Some(msg) = sub_cmd.next().await {
             let Ok(c) = serde_json::from_slice::<CompostCommand>(&msg.payload) else { continue };
             let mut b = batch_c.lock().await;
+            let now = Instant::now();
+            let iso = now_iso();
             match (c.action.as_str(), b.phase) {
                 ("start", Phase::Idle) => {
-                    *b = Batch::new();
+                    *b = Batch::new(uuid::Uuid::new_v4().to_string(), now, iso);
                     b.phase = Phase::Grinding;
-                    b.phase_started = Instant::now();
+                    b.phase_started = now;
                 }
                 ("dispense", Phase::TankReady) => {
                     b.phase = Phase::Dispensing;
-                    b.phase_started = Instant::now();
+                    b.phase_started = now;
                 }
                 ("dispense_done", Phase::Dispensing) => {
                     b.phase = Phase::TankReady;
@@ -175,30 +189,37 @@ async fn main() -> Result<()> {
         }
     });
 
-    // Publisher: every 10s, advance and emit state.
+    // Publisher / advancer: every 10 s, tick the FSM, persist, audit, emit.
     let mut tick = tokio::time::interval(Duration::from_secs(10));
     loop {
         tick.tick().await;
-        let (snapshot_bytes, _phase) = {
+        let now = Instant::now();
+        let iso = now_iso();
+        let snapshot = {
             let mut b = batch.lock().await;
-            advance(&mut b);
-            let aeration = match b.phase {
-                Phase::Mesophilic | Phase::Thermophilic => 60.0,
-                _ => 0.0,
-            };
+            advance(&mut b, now, &iso);
+            let aeration = if matches!(b.phase, Phase::Mesophilic | Phase::Thermophilic) { 60.0 } else { 0.0 };
+            let aeration_expected = aeration > 0.0;
+            let healthy_count = b.probes.values().filter(|p| p.is_healthy(now)).count();
+            let eff = b.effective_temp(now);
             let msg = StateMsg {
-                ts: now_iso(),
+                ts: iso.clone(),
                 batch_id: &b.id,
                 phase: b.phase,
-                temp_c: b.last_temp,
+                temp_c: eff,
                 aeration_duty_pct: aeration,
+                aeration_ok: b.aeration.is_healthy(now, aeration_expected),
+                probes_healthy: healthy_count,
                 thermo_hold_seconds: b.thermo_accumulated.as_secs(),
                 pathogen_kill_ok: b.pathogen_kill_ok,
             };
-            (serde_json::to_vec(&msg)?, b.phase)
+            let bytes = serde_json::to_vec(&msg)?;
+            save_state(&b.to_persistent());
+            if let Err(e) = audit_append(&b, now, &iso) {
+                tracing::warn!("audit log write failed: {}", e);
+            }
+            bytes
         };
-        client
-            .publish("kratt.composter.state", snapshot_bytes.into())
-            .await?;
+        client.publish("kratt.composter.state", snapshot.into()).await?;
     }
 }

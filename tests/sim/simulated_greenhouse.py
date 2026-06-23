@@ -219,22 +219,38 @@ async def _manifold_loop(nats: NATS, gh: GreenhouseState, beds: list[BedState]) 
 
 
 async def _composter_loop(nats: NATS, gh: GreenhouseState, scale: float) -> None:
-    """Composter slowly works through its FSM phases."""
+    """Composter slowly works through its FSM phases.
+
+    Now models real thermophilic biology: heat comes from microbial
+    activity (no electric heater), so when aeration drops the pile cools
+    toward ambient because anaerobic bacteria don't produce the same
+    metabolic heat. Two probes at slightly different positions report
+    independently so the controller's two-probe min-logic can be tested.
+    """
     PHASES = ["grinding", "mesophilic", "thermophilic", "cure", "tank_ready"]
+    # Aeration runs by default during mesophilic / thermophilic
+    aeration_lpm = 0.85
     counter = 0
     while True:
-        # Heat profile per phase
-        if gh.composter_phase == "thermophilic":
-            gh.composter_temp_c += (58.0 - gh.composter_temp_c) * 0.05
-            gh.composter_hours_above_55c += 30 / 3600.0 * scale
-        elif gh.composter_phase == "mesophilic":
-            gh.composter_temp_c += (42.0 - gh.composter_temp_c) * 0.05
+        is_active = gh.composter_phase in ("mesophilic", "thermophilic")
+        aeration_lpm = 0.85 + random.gauss(0, 0.03) if is_active else 0.0
+        aeration_lpm = max(0.0, aeration_lpm)
+
+        # Heat target. If aeration is starved during an active phase, the
+        # microbes can't sustain temperature and the pile coasts to ambient.
+        if not is_active or aeration_lpm < 0.1:
+            target = 22.0  # ambient
+        elif gh.composter_phase == "thermophilic":
+            target = 60.0
         else:
-            gh.composter_temp_c += (28.0 - gh.composter_temp_c) * 0.05
+            target = 42.0
+        gh.composter_temp_c += (target - gh.composter_temp_c) * 0.05
         gh.composter_temp_c += random.gauss(0, 0.2)
 
-        # Every ~10 minutes simulated (real seconds depend on time-scale),
-        # progress through the phases.
+        if gh.composter_phase == "thermophilic" and gh.composter_temp_c >= 55.0:
+            gh.composter_hours_above_55c += 30 / 3600.0 * scale
+
+        # Phase transitions every ~20 ticks (real seconds × time_scale).
         if counter > 0 and counter % 20 == 0:
             try:
                 idx = PHASES.index(gh.composter_phase)
@@ -243,10 +259,23 @@ async def _composter_loop(nats: NATS, gh: GreenhouseState, scale: float) -> None
             except ValueError:
                 gh.composter_phase = "thermophilic"
 
+        # Two probes at slightly different positions. Probe a is center,
+        # probe b is closer to the wall and reads ~2 C cooler.
+        for probe_id, offset in (("a", 0.0), ("b", -2.0)):
+            await nats.publish(
+                "kratt.composter.sensor.temp",
+                json.dumps({
+                    "ts": _now(), "kind": "temp",
+                    "probe_id": probe_id,
+                    "value": round(gh.composter_temp_c + offset + random.gauss(0, 0.1), 2),
+                }).encode(),
+            )
+        # Aeration flow reading (consumed by the controller's aeration health check)
         await nats.publish(
-            "kratt.composter.sensor.temp",
-            json.dumps({"ts": _now(), "kind": "temp", "value": round(gh.composter_temp_c, 2)}).encode(),
+            "kratt.composter.sensor.aeration_lpm",
+            json.dumps({"ts": _now(), "kind": "aeration_lpm", "value": round(aeration_lpm, 3)}).encode(),
         )
+        # Higher-level state pulse so the dashboard has something to render.
         await nats.publish(
             "kratt.composter.state",
             json.dumps({

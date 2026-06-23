@@ -11,8 +11,10 @@
     "phase":    { "type": "string", "enum": [
       "idle", "grinding", "mesophilic", "thermophilic", "cure", "tank_ready", "dispensing"
     ]},
-    "temp_c":   { "type": "number" },
+    "temp_c":   { "type": ["number", "null"], "description": "Effective temperature (min of healthy probes); null if no healthy probe quorum." },
     "aeration_duty_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+    "aeration_ok":    { "type": "boolean", "description": "True only if the air-pump sensor is reporting flow during phases that require aeration." },
+    "probes_healthy": { "type": "integer", "minimum": 0, "description": "Number of probes currently reporting fresh, non-stuck readings." },
     "phase_started": { "type": "string", "format": "date-time" },
     "thermo_hold_seconds": { "type": "integer", "minimum": 0 },
     "pathogen_kill_ok":    { "type": "boolean" }

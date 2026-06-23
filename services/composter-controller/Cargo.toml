@@ -15,6 +15,10 @@ anyhow = "1"
 futures-util = "0.3"
 uuid = { version = "1", features = ["v4"] }
 
+[lib]
+name = "composter_controller"
+path = "src/lib.rs"
+
 [[bin]]
 name = "composter-controller"
 path = "src/main.rs"
