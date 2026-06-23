@@ -10,7 +10,8 @@
     "ts":     { "type": "string", "format": "date-time" },
     "cause":  { "type": "string", "enum": [
       "leak_pan", "over_temp", "ec_runaway", "ph_low", "ph_high",
-      "mcu_heartbeat_loss", "estop", "watchdog"
+      "mcu_heartbeat_loss", "manifold_heartbeat_lost", "composter_heartbeat_lost",
+      "slurry_without_kill_gate", "estop", "watchdog"
     ]},
     "actuator_rail": { "type": "string", "enum": ["OFF", "ON"] },
     "latched":       { "type": "boolean" },

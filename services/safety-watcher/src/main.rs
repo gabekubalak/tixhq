@@ -4,13 +4,15 @@
 //! parallel watcher that:
 //!   - Subscribes to manifold + composter telemetry on the bus.
 //!   - Independently checks the same bounds the MCU checks.
+//!   - Vetoes slurry dose commands without a fresh pathogen-kill flag.
 //!   - Publishes kratt.event.safety.trip so the UI / alerting / planner all
 //!     see the trip immediately.
 //!   - Pings systemd's hardware watchdog so the Jetson reboots if this
 //!     service deadlocks.
 //!
-//! If the bus-side checks and the MCU disagree, the MCU's contactor wins —
-//! this watcher cannot energize anything, only de-energize.
+//! If the bus-side checks and the MCU disagree, the MCU's contactor wins,
+//! this watcher cannot energize anything, only de-energize. All trip logic
+//! lives in lib.rs and is unit-tested independently.
 
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -18,33 +20,22 @@ use std::time::{Duration, Instant};
 use anyhow::Result;
 use async_nats::Client;
 use futures_util::StreamExt;
+use safety_watcher::*;
 use serde::Deserialize;
 use tokio::sync::Mutex;
 use tracing::{error, warn};
 
-const EC_RUNAWAY: f64 = 4.0;
-const PH_LOW: f64 = 4.5;
-const PH_HIGH: f64 = 8.0;
-const COMPOSTER_OVER_TEMP_C: f64 = 65.0;
-const HEARTBEAT_TIMEOUT: Duration = Duration::from_secs(2);
+#[derive(Deserialize)]
+struct Sample { kind: String, value: f64 }
 
 #[derive(Deserialize)]
-struct Sample {
-    kind: String,
-    value: f64,
+struct ComposterStateMsg {
+    pathogen_kill_ok: bool,
 }
 
-struct Watch {
-    last_manifold: Instant,
-    last_compost: Instant,
-    latched: bool,
-}
-
-impl Watch {
-    fn new() -> Self {
-        let now = Instant::now();
-        Self { last_manifold: now, last_compost: now, latched: false }
-    }
+#[derive(Deserialize)]
+struct DoseCmd {
+    pump_id: String,
 }
 
 fn now_iso() -> String {
@@ -53,10 +44,10 @@ fn now_iso() -> String {
         .unwrap()
 }
 
-async fn publish_trip(client: &Client, cause: &str) -> Result<()> {
+async fn publish_trip(client: &Client, cause: TripCause) -> Result<()> {
     let body = serde_json::json!({
         "ts": now_iso(),
-        "cause": cause,
+        "cause": cause.as_str(),
         "actuator_rail": "OFF",
         "latched": true,
         "requires_ack": true,
@@ -64,8 +55,26 @@ async fn publish_trip(client: &Client, cause: &str) -> Result<()> {
     client
         .publish("kratt.event.safety.trip", serde_json::to_vec(&body)?.into())
         .await?;
-    error!(cause, "safety trip");
+    error!(cause = cause.as_str(), "safety trip");
     Ok(())
+}
+
+/// Try to fire a trip if the cause is fresh (not already latched).
+/// Returns true if we actually published.
+async fn maybe_trip(client: &Client, watch: &Arc<Mutex<Watch>>, cause: TripCause) -> bool {
+    let should_fire = {
+        let mut w = watch.lock().await;
+        if w.latched {
+            false
+        } else {
+            w.latched = true;
+            true
+        }
+    };
+    if should_fire {
+        let _ = publish_trip(client, cause).await;
+    }
+    should_fire
 }
 
 #[tokio::main]
@@ -73,7 +82,7 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt().init();
     let nats_url = std::env::var("NATS_URL").unwrap_or_else(|_| "127.0.0.1:4222".into());
     let client = async_nats::connect(nats_url.as_str()).await?;
-    let watch: Arc<Mutex<Watch>> = Arc::new(Mutex::new(Watch::new()));
+    let watch: Arc<Mutex<Watch>> = Arc::new(Mutex::new(Watch::new(Instant::now())));
 
     // Manifold task: trips on EC/pH bounds.
     let watch_m = watch.clone();
@@ -82,51 +91,63 @@ async fn main() -> Result<()> {
     tokio::spawn(async move {
         while let Some(msg) = sub_manifold.next().await {
             let Ok(m) = serde_json::from_slice::<Sample>(&msg.payload) else { continue };
-            let cause = {
+            {
                 let mut w = watch_m.lock().await;
                 w.last_manifold = Instant::now();
-                if w.latched {
-                    None
-                } else {
-                    let c = match m.kind.as_str() {
-                        "ec" if m.value > EC_RUNAWAY => Some("ec_runaway"),
-                        "ph" if m.value < PH_LOW => Some("ph_low"),
-                        "ph" if m.value > PH_HIGH => Some("ph_high"),
-                        _ => None,
-                    };
-                    if c.is_some() {
-                        w.latched = true;
-                    }
-                    c
-                }
-            };
-            if let Some(c) = cause {
-                let _ = publish_trip(&client_m, c).await;
+            }
+            if let Some(cause) = manifold_trip(&m.kind, m.value) {
+                maybe_trip(&client_m, &watch_m, cause).await;
             }
         }
     });
 
-    // Composter task: trips on over-temperature.
+    // Composter sensor task: trips on over-temperature, tracks heartbeat.
     let watch_c = watch.clone();
     let client_c = client.clone();
     let mut sub_compost = client.subscribe("kratt.composter.sensor.*").await?;
     tokio::spawn(async move {
         while let Some(msg) = sub_compost.next().await {
             let Ok(m) = serde_json::from_slice::<Sample>(&msg.payload) else { continue };
-            let cause = {
+            {
                 let mut w = watch_c.lock().await;
-                w.last_compost = Instant::now();
-                if w.latched {
-                    None
-                } else if m.kind == "temp" && m.value > COMPOSTER_OVER_TEMP_C {
-                    w.latched = true;
-                    Some("over_temp")
-                } else {
-                    None
-                }
+                w.last_compost_sensor = Instant::now();
+            }
+            if let Some(cause) = composter_trip(&m.kind, m.value) {
+                maybe_trip(&client_c, &watch_c, cause).await;
+            }
+        }
+    });
+
+    // Composter STATE task: tracks pathogen_kill_ok for the dose veto.
+    // Separate stream from the sensor probes so the kill-gate signal
+    // doesn't get drowned out by temp samples.
+    let watch_s = watch.clone();
+    let mut sub_state = client.subscribe("kratt.composter.state").await?;
+    tokio::spawn(async move {
+        while let Some(msg) = sub_state.next().await {
+            let Ok(m) = serde_json::from_slice::<ComposterStateMsg>(&msg.payload) else { continue };
+            let mut w = watch_s.lock().await;
+            w.last_compost_state = Some(Instant::now());
+            w.pathogen_kill_ok = m.pathogen_kill_ok;
+        }
+    });
+
+    // Dose-veto task: refuses slurry without a fresh pathogen-kill flag.
+    // A bad dose is a serious failure (something issued a slurry command
+    // that the gate should have blocked), so the response is a full trip.
+    let watch_d = watch.clone();
+    let client_d = client.clone();
+    let mut sub_dose = client.subscribe("kratt.command.dose").await?;
+    tokio::spawn(async move {
+        while let Some(msg) = sub_dose.next().await {
+            let Ok(d) = serde_json::from_slice::<DoseCmd>(&msg.payload) else { continue };
+            let authorized = {
+                let w = watch_d.lock().await;
+                w.slurry_authorized(Instant::now())
             };
-            if let Some(c) = cause {
-                let _ = publish_trip(&client_c, c).await;
+            if let Some(cause) = dose_trip(&d.pump_id, authorized) {
+                warn!(pump = %d.pump_id, "slurry dose attempted without kill gate, tripping");
+                maybe_trip(&client_d, &watch_d, cause).await;
             }
         }
     });
@@ -137,23 +158,14 @@ async fn main() -> Result<()> {
     loop {
         tick.tick().await;
         let _ = sd_notify::notify(false, &[sd_notify::NotifyState::Watchdog]);
+        let now = Instant::now();
         let cause = {
-            let mut w = watch_h.lock().await;
-            if w.latched {
-                None
-            } else if w.last_manifold.elapsed() > HEARTBEAT_TIMEOUT {
-                w.latched = true;
-                Some("manifold_heartbeat_lost")
-            } else if w.last_compost.elapsed() > HEARTBEAT_TIMEOUT {
-                w.latched = true;
-                Some("composter_heartbeat_lost")
-            } else {
-                None
-            }
+            let w = watch_h.lock().await;
+            if w.latched { None } else { heartbeat_trip(&w, now) }
         };
         if let Some(c) = cause {
-            warn!(cause = c, "heartbeat lost — tripping safety");
-            let _ = publish_trip(&client, c).await;
+            warn!(cause = c.as_str(), "heartbeat lost, tripping safety");
+            maybe_trip(&client, &watch_h, c).await;
         }
     }
 }
