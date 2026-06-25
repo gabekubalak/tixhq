@@ -1,5 +1,5 @@
 <svelte:head>
-  <title>KrattOS — the offline AI farm appliance</title>
+  <title>KrattOS, the offline AI farm appliance</title>
 </svelte:head>
 
 <section class="hero">

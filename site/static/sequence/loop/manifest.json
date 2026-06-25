@@ -1,0 +1,14 @@
+{
+  "scene": "loop",
+  "frames": 150,
+  "desktop": {
+    "width": 1600,
+    "height": 900,
+    "pattern": "desktop/frame-####.webp"
+  },
+  "mobile": {
+    "width": 800,
+    "height": 450,
+    "pattern": "mobile/frame-####.webp"
+  }
+}
