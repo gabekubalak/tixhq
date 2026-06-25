@@ -82,7 +82,7 @@
 <ScrollScaffold>
   <!-- Beat 1: cold open. The mark draws, the leaves unfurl, the
        wordmark resolves, the opening line lands. -->
-  <ColdOpen pin="+=180%" />
+  <ColdOpen pin="+=120%" />
 
   <!-- Beat 2: the myth. Plain typography, no 3D, parallax-free. -->
   <section class="myth">
@@ -102,7 +102,7 @@
   </section>
 
   <!-- Beat 3: the cabinet arrives, shelves light. -->
-  <ScrubbedSequence scene="cabinet" eager={true} copy={cabinetCopy} pin="+=240%" />
+  <ScrubbedSequence scene="cabinet" eager={true} copy={cabinetCopy} pin="+=150%" />
 
   <!-- Beat 5: two brains, one rule. Typography over a paper field. -->
   <section class="two-brains">
@@ -134,7 +134,7 @@
   </section>
 
   <!-- Beat 4: the closed compost-to-greens loop. -->
-  <ScrubbedSequence scene="loop" copy={loopCopy} pin="+=260%" />
+  <ScrubbedSequence scene="loop" copy={loopCopy} pin="+=170%" />
 
   <!-- Beat 6: one mind, many bodies. Greenhouse scrub. -->
   <section class="bridge">
@@ -148,7 +148,7 @@
     </div>
   </section>
 
-  <ScrubbedSequence scene="greenhouse" copy={greenhouseCopy} pin="+=240%" />
+  <ScrubbedSequence scene="greenhouse" copy={greenhouseCopy} pin="+=150%" />
 
   <noscript>
     <p style="text-align:center;padding:2rem 6vw;">

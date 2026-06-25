@@ -1,14 +1,14 @@
 {
   "scene": "loop",
-  "frames": 150,
+  "frames": 100,
   "desktop": {
-    "width": 1600,
-    "height": 900,
+    "width": 1366,
+    "height": 768,
     "pattern": "desktop/frame-####.webp"
   },
   "mobile": {
-    "width": 800,
-    "height": 450,
+    "width": 768,
+    "height": 432,
     "pattern": "mobile/frame-####.webp"
   }
 }

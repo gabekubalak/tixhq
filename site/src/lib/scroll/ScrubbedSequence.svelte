@@ -68,9 +68,14 @@
     if (!img) return;
 
     const ctx = canvas.getContext("2d", { alpha: false });
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // The source frames top out at ~1366px wide, so backing the canvas at
+    // 2x device pixels only upscales them (blurry) and doubles the per-
+    // frame draw cost (janky). Cap the backing store at the frame's own
+    // resolution: crisp, and a third of the fill rate of a 2x canvas.
     const cssW = canvas.clientWidth;
     const cssH = canvas.clientHeight;
+    const srcW = img.naturalWidth || img.width || cssW;
+    const dpr = Math.min(window.devicePixelRatio || 1, srcW / Math.max(cssW, 1), 1.5);
     const needW = Math.round(cssW * dpr);
     const needH = Math.round(cssH * dpr);
     if (canvas.width !== needW || canvas.height !== needH) {
@@ -100,16 +105,18 @@
   function startPreload() {
     if (started || !manifest) return;
     started = true;
-    const d = variantDims();
-    queue = preloadScene(scene, variant, manifest.frames, { concurrency: 8 });
+    const q = preloadScene(scene, variant, manifest.frames, { concurrency: 8 });
+    queue = q;
     // Draw progressively as frames arrive so the first scroll isn't blank.
+    // Stop if this scene was released (queue swapped to null) mid-load.
     const poll = setInterval(() => {
+      if (queue !== q) { clearInterval(poll); return; }
       draw();
-      if (queue.loaded() >= manifest.frames) clearInterval(poll);
+      if (q.loaded() >= manifest.frames) clearInterval(poll);
     }, 120);
-    queue.ready.then(() => {
+    q.ready.then(() => {
       clearInterval(poll);
-      draw();
+      if (queue === q) draw();
     });
   }
 
@@ -117,6 +124,7 @@
     variant = pickVariant();
     let st = null;
     let io = null;
+    let releaseIo = null;
     let unsub = () => {};
 
     (async () => {
@@ -139,38 +147,49 @@
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
 
-      // Preload: eager scenes now, others when they approach the viewport.
-      if (eager) {
-        startPreload();
-      } else {
-        io = new IntersectionObserver(
-          (entries) => {
-            if (entries.some((e) => e.isIntersecting)) {
-              startPreload();
-              io.disconnect();
-            }
-          },
-          { rootMargin: "200% 0px" }
-        );
-        io.observe(section);
-      }
+      // Eager scenes (the first one) preload immediately so the opening
+      // scrub is ready instantly. Others wait for the release observer
+      // below to pull them in as they approach.
+      if (eager) startPreload();
 
       st = ScrollTrigger.create({
         trigger: section,
         start: "top top",
         end: pin,
         pin: true,
-        scrub: 0.4,
+        // Snappier than 0.4: the canvas chases the scroll with less lag,
+        // which is what makes a scrub feel responsive rather than "slow."
+        scrub: 0.25,
         onUpdate: (self) => {
           progress = self.progress;
           draw();
         },
       });
+
+      // Free this scene's decoded frames once it is well out of view, so
+      // three scenes' worth of full-res bitmaps don't stack up in memory
+      // (the main cause of mid-scroll jank). Re-preload on re-approach.
+      releaseIo = new IntersectionObserver(
+        (entries) => {
+          const e = entries[0];
+          if (!e) return;
+          if (e.isIntersecting) {
+            if (!started) startPreload();
+          } else if (queue && started) {
+            queue = null;
+            started = false;
+            firstDrawn = false;
+          }
+        },
+        { rootMargin: "150% 0px" }
+      );
+      releaseIo.observe(section);
     }
 
     return () => {
       st?.kill();
       io?.disconnect();
+      releaseIo?.disconnect();
       unsub();
     };
   });

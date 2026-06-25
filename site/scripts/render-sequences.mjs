@@ -23,14 +23,20 @@ const __filename = fileURLToPath(import.meta.url);
 const SITE = resolve(dirname(__filename), "..");
 const OUT_ROOT = join(SITE, "static", "sequence");
 
-const DESKTOP = { w: 1600, h: 900, quality: 80 };
-const MOBILE = { w: 800, h: 450, quality: 78 };
+// Desktop frames at 1366x768 rather than 1600x900: on a typical laptop
+// the canvas is ~1440 wide, so 1366 is plenty, and the smaller frames
+// decode faster and hold far less bitmap memory (the thing that makes
+// long scrubs jank). Mobile stays half-size.
+const DESKTOP = { w: 1366, h: 768, quality: 80 };
+const MOBILE = { w: 768, h: 432, quality: 78 };
 
 function parseArgs(argv) {
   const out = {
     baseUrl: "http://localhost:4173",
-    scenes: ["cabinet", "loop"],
-    frames: 150,
+    scenes: ["cabinet", "loop", "greenhouse"],
+    // 100 frames is smooth for a scrub and a third less to decode/hold
+    // than 150. Bump with --frames if you want buttery-slow motion.
+    frames: 100,
   };
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];

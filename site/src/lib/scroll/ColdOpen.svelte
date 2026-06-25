@@ -67,7 +67,7 @@
           start: "top top",
           end: pin,
           pin: true,
-          scrub: 0.4,
+          scrub: 0.25,
           onUpdate: (self) => {
             progress = self.progress;
           },
