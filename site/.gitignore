@@ -1,6 +1,9 @@
 node_modules/
 .svelte-kit/
 .vercel/
-build/
+# Anchored so it only ignores a top-level build/ output dir, not the
+# src/routes/build/ page route (which an unanchored "build/" swallowed,
+# breaking the Vercel prerender with a 404 on /build).
+/build/
 .env
 .env.*

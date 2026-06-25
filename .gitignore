@@ -13,8 +13,9 @@ target/
 **/*.rs.bk
 # Cargo.lock is committed: every workspace member is a binary, not a library.
 
-# ESP-IDF
-build/
+# ESP-IDF (scoped to firmware so an unanchored "build/" does not also
+# swallow web routes like site/src/routes/build/)
+firmware/**/build/
 sdkconfig
 sdkconfig.old
 managed_components/
