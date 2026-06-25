@@ -47,3 +47,6 @@ models/*.txt
 *.key
 *.pem
 minisign.sec
+
+# Local Claude Code settings (personal, not project config)
+.claude/settings.local.json
