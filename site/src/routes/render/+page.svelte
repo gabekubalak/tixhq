@@ -42,13 +42,18 @@
 
       const THREE = await import("three");
       const { buildAppliance } = await import("$lib/cad/buildAppliance.js");
+      const { buildGreenhouse } = await import("$lib/cad/buildGreenhouse.js");
+      const { GREENHOUSE_DIMS } = await import("$lib/cad/dimensionsGreenhouse.js");
       const { indexParts } = await import("$lib/cad/liveBindings.js");
       const sequences = {
         cabinet: await import("$lib/sequences/cabinet.js"),
         loop: await import("$lib/sequences/loop.js"),
+        greenhouse: await import("$lib/sequences/greenhouse.js"),
       };
 
       const dims = await loadDimensions();
+      // Greenhouse scenes use a different geometry + dimensions block.
+      const greenhouseDims = GREENHOUSE_DIMS;
 
       // Canvas + renderer. Fixed pixel ratio = 1 so capture is byte-stable.
       canvas.width = w;
@@ -70,49 +75,72 @@
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf4f1ea);
 
-      // Lights: same key + fill + hemisphere as the operator twin.
-      const H = dims.cabinet.height;
-      const W = dims.cabinet.width;
-      scene.add(new THREE.HemisphereLight(0xeaf0ff, 0x394050, 0.7));
-      const key = new THREE.DirectionalLight(0xfff2dc, 1.1);
-      key.position.set(W * 2, H * 1.6, W * 1.5);
-      scene.add(key);
-      const fill = new THREE.DirectionalLight(0xc8d6ff, 0.35);
-      fill.position.set(-W * 1.5, H * 0.8, -W);
-      scene.add(fill);
-      const kick = new THREE.PointLight(0xfff2dc, 0.25, 3);
-      kick.position.set(0, 0.4, 0.6);
-      scene.add(kick);
+      // Which model family a scene belongs to. The cabinet and the
+      // greenhouse have disjoint geometry; we build only one.
+      const greenhouseScenes = new Set(["greenhouse"]);
+      const initialIsGreenhouse = greenhouseScenes.has(initialScene);
 
-      // Ground plane so feet read.
-      const ground = new THREE.Mesh(
-        new THREE.PlaneGeometry(8, 8),
-        new THREE.MeshStandardMaterial({ color: 0xd5d8db, roughness: 0.95 })
-      );
-      ground.rotation.x = -Math.PI / 2;
-      ground.position.y = -0.04;
-      scene.add(ground);
+      // Lighting + ground are sized to the active model. The cabinet
+      // wants a tight 3-point setup over its tabletop footprint; the
+      // greenhouse wants sun + sky over a 30 ft length.
+      if (initialIsGreenhouse) {
+        const W2 = GREENHOUSE_DIMS.width_m;
+        const H2 = GREENHOUSE_DIMS.peak_height_m;
+        const L2 = GREENHOUSE_DIMS.length_m;
+        scene.add(new THREE.HemisphereLight(0xeaf0ff, 0x394050, 0.85));
+        const sun = new THREE.DirectionalLight(0xfff0d8, 1.05);
+        sun.position.set(W2 * 1.5, H2 * 3, L2 * 0.6);
+        scene.add(sun);
+        const fill = new THREE.DirectionalLight(0xc8d6ff, 0.3);
+        fill.position.set(-W2 * 1.5, H2 * 1.5, -L2 * 0.6);
+        scene.add(fill);
+        // buildGreenhouse already adds its own ground patch.
+      } else {
+        const H = dims.cabinet.height;
+        const W = dims.cabinet.width;
+        scene.add(new THREE.HemisphereLight(0xeaf0ff, 0x394050, 0.7));
+        const key = new THREE.DirectionalLight(0xfff2dc, 1.1);
+        key.position.set(W * 2, H * 1.6, W * 1.5);
+        scene.add(key);
+        const fill = new THREE.DirectionalLight(0xc8d6ff, 0.35);
+        fill.position.set(-W * 1.5, H * 0.8, -W);
+        scene.add(fill);
+        const kick = new THREE.PointLight(0xfff2dc, 0.25, 3);
+        kick.position.set(0, 0.4, 0.6);
+        scene.add(kick);
 
-      const appliance = buildAppliance(dims);
-      scene.add(appliance);
+        const ground = new THREE.Mesh(
+          new THREE.PlaneGeometry(8, 8),
+          new THREE.MeshStandardMaterial({ color: 0xd5d8db, roughness: 0.95 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.04;
+        scene.add(ground);
+      }
+
+      // Build whichever model the requested scene needs.
+      const activeDims = initialIsGreenhouse ? greenhouseDims : dims;
+      const root = initialIsGreenhouse
+        ? buildGreenhouse(greenhouseDims)
+        : buildAppliance(dims);
+      scene.add(root);
 
       // The operator-twin reservoir labels are 2D sprites that always
       // face camera and dominate the cinematic shot. Hide every Sprite
       // in the captured scene.
-      appliance.traverse((o) => {
+      root.traverse((o) => {
         if (o.isSprite) o.visible = false;
       });
 
-      const parts = indexParts(appliance);
+      const parts = indexParts(root);
 
       const camera = new THREE.PerspectiveCamera(38, w / h, 0.01, 50);
 
-      // Init each sequence once so any helper meshes (pulse, hero
-      // lettuce) exist whether we render that scene or not. Cheap.
+      // Init only the sequence we'll be rendering. Cross-scene init was
+      // safe for the cabinet (cabinet + loop share a model) but the
+      // greenhouse sequence touches a totally different parts map.
       const states = {};
-      for (const [name, mod] of Object.entries(sequences)) {
-        states[name] = mod.init(scene, parts, dims);
-      }
+      states[initialScene] = sequences[initialScene].init(scene, parts, activeDims);
       // Hide every sequence's helper meshes by default; the active scene
       // re-enables what it wants per frame.
       function hideHelpers() {
@@ -128,7 +156,7 @@
         hideHelpers();
         const mod = sequences[currentScene];
         if (!mod) throw new Error(`unknown scene: ${currentScene}`);
-        mod.apply(t, scene, parts, dims, camera, states[currentScene]);
+        mod.apply(t, scene, parts, activeDims, camera, states[currentScene]);
         renderer.render(scene, camera);
         // No async textures in this scene set, so we can flip ready
         // immediately. If async textures are added later, await their

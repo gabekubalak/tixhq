@@ -1,10 +1,9 @@
 <script>
   import ScrollScaffold from "$lib/scroll/ScrollScaffold.svelte";
   import ScrubbedSequence from "$lib/scroll/ScrubbedSequence.svelte";
+  import ColdOpen from "$lib/scroll/ColdOpen.svelte";
 
-  // Copy overlays keyed to scroll progress through each scene. `at` is the
-  // 0..1 point in the pinned scroll where the line is fully lit; it fades
-  // on either side. No em-dashes anywhere (voice rule, enforced by
+  // All overlay copy: no em-dashes anywhere (voice rule, enforced by
   // scripts/check-dashes.mjs).
   const cabinetCopy = [
     {
@@ -53,6 +52,27 @@
       body: "Composted nutrient, mixed with water, feeds the greens above.",
     },
   ];
+
+  const greenhouseCopy = [
+    {
+      at: 0.12,
+      align: "left",
+      title: "Same mind, bigger body",
+      body: "A 14 by 30 ft hoop house. Six NFT beds. The same KrattOS running it.",
+    },
+    {
+      at: 0.55,
+      align: "left",
+      title: "No hand-watering",
+      body: "A composter-fed recirculation manifold runs every bed. You walk in to pick.",
+    },
+    {
+      at: 0.92,
+      align: "right",
+      title: "From $1,450 in parts",
+      body: "Buildable spec, open in the repo.",
+    },
+  ];
 </script>
 
 <svelte:head>
@@ -60,24 +80,75 @@
 </svelte:head>
 
 <ScrollScaffold>
-  <!-- Intro -->
-  <section class="intro">
+  <!-- Beat 1: cold open. The mark draws, the leaves unfurl, the
+       wordmark resolves, the opening line lands. -->
+  <ColdOpen pin="+=180%" />
+
+  <!-- Beat 2: the myth. Plain typography, no 3D, parallax-free. -->
+  <section class="myth">
     <div class="container">
-      <h1>Anyone can grow their own food. KrattOS makes it automatic.</h1>
-      <p class="lede">
-        Most people can't keep a garden alive, not for lack of wanting to,
-        but for lack of time. KrattOS is an appliance that does the work. You
-        give it water and power. It gives you fresh food, week after week.
+      <p class="kicker">Why "Kratt"</p>
+      <p class="copy">
+        In Estonian folklore, a <strong>Kratt</strong> is a little household
+        servant. You build it out of whatever is lying around: straw, old
+        tools, a broken pot. It comes to life to do the chores you would
+        rather not.
       </p>
-      <p class="scroll-hint">Scroll</p>
+      <p class="copy small">
+        KrattOS is the software that runs the modern Kratt: a machine that
+        grows your food out of water, electricity, and your kitchen scraps.
+      </p>
     </div>
   </section>
 
-  <!-- Beat 3: the cabinet arrives, shelves light -->
+  <!-- Beat 3: the cabinet arrives, shelves light. -->
   <ScrubbedSequence scene="cabinet" eager={true} copy={cabinetCopy} pin="+=240%" />
 
-  <!-- Beat 4: the closed compost-to-greens loop -->
+  <!-- Beat 5: two brains, one rule. Typography over a paper field. -->
+  <section class="two-brains">
+    <div class="container">
+      <p class="kicker">Two brains, one rule</p>
+      <div class="brains">
+        <div class="brain">
+          <h3>The safety brain</h3>
+          <p>
+            A small microcontroller that watches the rails. It cuts power
+            on a leak, a runaway probe, an over-temperature, or a heartbeat
+            loss. It does not need the rest of the system to function.
+          </p>
+        </div>
+        <div class="brain ai">
+          <h3>The thinking brain</h3>
+          <p>
+            A local AI that watches the canopy, follows the recipe, and
+            decides when to water, light, and dose. It runs offline on the
+            appliance.
+          </p>
+        </div>
+      </div>
+      <p class="rule">
+        Software can think. Hardware keeps you safe. The line between them
+        is real, and the thinking side can never cross it.
+      </p>
+    </div>
+  </section>
+
+  <!-- Beat 4: the closed compost-to-greens loop. -->
   <ScrubbedSequence scene="loop" copy={loopCopy} pin="+=260%" />
+
+  <!-- Beat 6: one mind, many bodies. Greenhouse scrub. -->
+  <section class="bridge">
+    <div class="container">
+      <p class="kicker">One mind, many bodies</p>
+      <p class="copy">
+        The same KrattOS runs on a clip-on board, a Raspberry Pi, the full
+        cabinet, and out in a greenhouse. Whatever you bring, it reads its
+        site profile and adapts.
+      </p>
+    </div>
+  </section>
+
+  <ScrubbedSequence scene="greenhouse" copy={greenhouseCopy} pin="+=240%" />
 
   <noscript>
     <p style="text-align:center;padding:2rem 6vw;">
@@ -134,45 +205,6 @@
   </section>
 
   <section class="section">
-    <div class="container two">
-      <div>
-        <h2>It does the part you don't have time for.</h2>
-        <p>
-          Four lit shelves grow lettuce, herbs, and microgreens on a rotation.
-          Probes watch moisture, pH, and nutrient strength. A small on-board
-          brain follows a recipe and adjusts the lights and water by itself.
-          A composter at the base turns your kitchen scraps into the nutrient
-          that feeds the plants above.
-        </p>
-        <p>
-          You don't water it on a schedule. You don't learn hydroponics. You
-          don't babysit it between long shifts. It just keeps producing, and
-          tells you when there's food to pick.
-        </p>
-        <a class="btn btn-secondary" href="/system">See the system</a>
-      </div>
-      <div class="claims">
-        <div class="claim">
-          <strong>4 to 6 heads</strong>
-          <span>of fresh greens a week, hands-off</span>
-        </div>
-        <div class="claim">
-          <strong>From $149</strong>
-          <span>so cost is never the barrier</span>
-        </div>
-        <div class="claim">
-          <strong>Zero</strong>
-          <span>cloud, subscriptions, or green thumb</span>
-        </div>
-        <div class="claim">
-          <strong>Open</strong>
-          <span>source, so it can't be taken away</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
     <div class="container">
       <div class="mission">
         <h2>Why we're building this</h2>
@@ -203,43 +235,98 @@
         affordable units into real kitchens. That's what we're raising for,
         and where it starts.
       </p>
-      <a class="btn brass" href="/pitch">Back the mission</a>
+      <div class="cta-row">
+        <a class="btn brass" href="/pitch">Back the mission</a>
+        <a class="btn btn-secondary on-dark" href="https://github.com" target="_blank" rel="noreferrer">Open on GitHub</a>
+      </div>
     </div>
   </section>
 </ScrollScaffold>
 
 <style>
-  .intro {
-    min-height: 92vh;
-    display: flex;
-    align-items: center;
-    background: linear-gradient(180deg, #faf6eb 0%, var(--paper) 100%);
+  /* Typography-only beats between the scrubs. They breathe; they don't
+     compete with the 3D for attention. */
+  .myth, .two-brains, .bridge {
+    padding: clamp(6rem, 14vh, 11rem) 0;
+    background: var(--paper);
   }
-  .intro h1 {
-    color: var(--ink);
-    font-size: clamp(2rem, 5vw, 3.6rem);
-    max-width: 18ch;
+  .myth { background: linear-gradient(180deg, var(--paper) 0%, #f9f4e6 100%); }
+  .bridge { background: linear-gradient(180deg, #f9f4e6 0%, var(--paper) 100%); }
+  .two-brains { background: var(--paper-warm); }
+
+  .myth .container,
+  .two-brains .container,
+  .bridge .container {
+    text-align: center;
   }
-  .intro .lede {
-    margin-top: 1.2rem;
-  }
-  .scroll-hint {
-    margin-top: 3rem;
+  .kicker {
     font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 600;
     font-size: 0.85rem;
     letter-spacing: 0.25em;
     text-transform: uppercase;
-    color: #8a8478;
-    animation: bob 2s ease-in-out infinite;
+    color: var(--brass);
+    margin: 0 0 1.4rem;
   }
-  @keyframes bob {
-    0%, 100% { transform: translateY(0); opacity: 0.6; }
-    50% { transform: translateY(6px); opacity: 1; }
+  .myth .copy, .bridge .copy {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 500;
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    line-height: 1.4;
+    color: var(--ink);
+    margin: 0 auto 1rem;
+    max-width: 36ch;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .scroll-hint { animation: none; }
+  .myth .copy.small {
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+    color: #4a4a45;
+    max-width: 48ch;
+  }
+  .myth strong { color: var(--evergreen); }
+
+  .brains {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 2rem auto 1.5rem;
+    max-width: 920px;
+  }
+  @media (max-width: 760px) {
+    .brains { grid-template-columns: 1fr; }
+  }
+  .brain {
+    background: var(--paper);
+    border-radius: 14px;
+    padding: 1.6rem 1.5rem;
+    text-align: left;
+    border: 1px solid #DDD3BB;
+  }
+  .brain h3 {
+    color: var(--evergreen);
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+  }
+  .brain p {
+    color: #4a4a45;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .brain.ai {
+    border-color: var(--brass);
+  }
+  .brain.ai h3 { color: var(--ink); }
+  .rule {
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    font-weight: 500;
+    font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+    color: var(--ink);
+    max-width: 38ch;
+    margin: 2rem auto 0;
+    line-height: 1.45;
   }
 
+  /* Existing sections, unchanged in look. */
   .sash { background: var(--paper-warm); }
   .sash.dark { background: var(--evergreen); color: var(--paper); }
   .sash.dark h2, .sash.dark .lede { color: var(--paper); }
@@ -248,6 +335,21 @@
   .center .btn { margin-top: 1.5rem; }
   .btn.brass { background: var(--brass); color: #fff; }
   .btn.brass:hover { background: #a17e21; }
+  .btn-secondary.on-dark {
+    color: var(--paper);
+    border-color: var(--paper);
+  }
+  .btn-secondary.on-dark:hover {
+    background: var(--paper);
+    color: var(--evergreen);
+  }
+  .cta-row {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
 
   .tiers {
     display: grid;
@@ -283,36 +385,6 @@
   .tier p { line-height: 1.5; color: #4a4a45; }
   .tier ul { padding-left: 1.1rem; margin: .75rem 0 0; color: #4a4a45; font-size: .92rem; }
   .tier-cta { text-align: center; margin-top: 1rem; }
-
-  .two {
-    display: grid;
-    grid-template-columns: 1.1fr .9fr;
-    gap: 3rem;
-    align-items: center;
-  }
-  @media (max-width: 760px) {
-    .two { grid-template-columns: 1fr; }
-  }
-  .two p { line-height: 1.6; color: #4a4a45; margin-bottom: 1rem; }
-  .claims {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-  .claim {
-    background: var(--paper-warm);
-    border-radius: 12px;
-    padding: 1.25rem;
-  }
-  .claim strong {
-    display: block;
-    color: var(--evergreen);
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: .35rem;
-  }
-  .claim span { color: #4a4a45; font-size: .9rem; line-height: 1.4; display: block; }
 
   .mission {
     max-width: 760px;
