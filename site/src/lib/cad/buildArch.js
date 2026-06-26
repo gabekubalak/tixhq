@@ -99,24 +99,45 @@ function makeLabel(text, color = "#ffffff") {
   return sp;
 }
 
-// Tier labels for the arch scene — rendered as canvas sprites so they
-// stay readable at any camera angle.
+// Tier labels for the arch scene, rendered as canvas sprites so they
+// stay readable at any camera angle. Sized to fit the actual text width
+// (no invisible right gutter), and anchored by their left edge so the
+// caller can place a label flush with the leftmost gutter without it
+// drifting over the service-node row to the right.
 function makeTierLabel(text) {
   if (typeof document === "undefined") return null;
+  const measureCanvas = document.createElement("canvas");
+  const mctx = measureCanvas.getContext("2d");
+  const FONT = "bold 28px system-ui, sans-serif";
+  mctx.font = FONT;
+  const textW = Math.ceil(mctx.measureText(text).width);
+
+  const PAD = 12;
   const canvas = document.createElement("canvas");
-  canvas.width = 512; canvas.height = 60;
+  canvas.width = textW + PAD * 2;
+  canvas.height = 60;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "rgba(20,26,36,0.0)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "rgba(255,255,255,0.18)";
   ctx.fillRect(0, canvas.height - 2, canvas.width, 2);
   ctx.fillStyle = "#8090b0";
-  ctx.font = "bold 28px system-ui, sans-serif";
+  ctx.font = FONT;
   ctx.textBaseline = "middle";
-  ctx.fillText(text, 10, canvas.height / 2);
+  ctx.fillText(text, PAD, canvas.height / 2);
   const tex = new THREE.CanvasTexture(canvas);
-  const sp  = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
-  sp.scale.set(2.2, 0.26, 1);
+  tex.anisotropy = 4;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: tex, depthTest: false, transparent: true,
+  }));
+  // World-unit width derived from a fixed pixels-per-unit so all four
+  // labels share one rendering scale.
+  const PX_PER_UNIT = 240;
+  const wUnits = canvas.width / PX_PER_UNIT;
+  const hUnits = canvas.height / PX_PER_UNIT;
+  sp.scale.set(wUnits, hUnits, 1);
+  // Sprite origin defaults to center; shift it so position.x is the label's
+  // LEFT edge in world space. Then a caller can pin it to the layout gutter
+  // and never have to math around the longest tier string.
+  sp.center.set(0, 0.5);
   return sp;
 }
 
@@ -135,11 +156,13 @@ export function buildArch() {
 
   // Tier separator lines + labels, anchored to each tier's own depth (z)
   // and height (y) so they sit with the row of nodes they describe.
+  // Short. Each node already tags its own language (py / rs / FastAPI),
+  // so the tier label only needs to name the tier, not repeat the stack.
   const tierLabels = [
-    "Tier 0 — Embedded MCUs (ESP32-S3, FreeRTOS)",
-    "Tier 1 — Ingest & Control (Python / Rust)",
-    "Tier 2 — AI Planner & Safety (Python / Rust)",
-    "Tier 3 — Local UI (FastAPI + SvelteKit)",
+    "Tier 0: MCUs",
+    "Tier 1: Ingest & Control",
+    "Tier 2: Planner & AI",
+    "Tier 3: Local UI",
   ];
   for (let t = 0; t < tierLabels.length; t++) {
     const y = TIER_Y[t];
@@ -151,7 +174,10 @@ export function buildArch() {
     line.position.set(0, y - 0.05, z);
     root.add(line);
     const sp = makeTierLabel(tierLabels[t]);
-    if (sp) { sp.position.set(-3.4, y + NODE_H, z); root.add(sp); }
+    // Anchor at the layout's left gutter. Leftmost service node sits at
+    // x = -2.4, so we keep the label entirely to its left. Label is left-
+    // edge-anchored (see makeTierLabel) so this is the actual visible left.
+    if (sp) { sp.position.set(-4.6, y + NODE_H, z); root.add(sp); }
   }
 
   // Service nodes. Box, label, and the edge anchor are all co-located at
