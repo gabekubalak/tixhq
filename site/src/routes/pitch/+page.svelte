@@ -11,7 +11,7 @@
       where the mission starts.
     </p>
     <div class="cta">
-      <a class="btn brass" href="https://www.gofundme.com/" target="_blank" rel="noreferrer">Back on GoFundMe</a>
+      <a class="btn brass" href="https://gofund.me/1bee77001" target="_blank" rel="noreferrer">Back on GoFundMe</a>
       <a class="btn btn-secondary" href="/twin">See what gets built</a>
     </div>
   </div>
@@ -148,7 +148,7 @@
       kit pre-order). Even a share helps.
     </p>
     <div class="cta">
-      <a class="btn brass" href="https://www.gofundme.com/" target="_blank" rel="noreferrer">Back on GoFundMe</a>
+      <a class="btn brass" href="https://gofund.me/1bee77001" target="_blank" rel="noreferrer">Back on GoFundMe</a>
     </div>
   </div>
 </section>

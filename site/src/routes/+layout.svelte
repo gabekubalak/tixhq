@@ -29,7 +29,7 @@
 <footer>
   <div class="inner">
     <span>KrattOS &copy; 2026. Software is MIT-licensed. The appliance is closed-source until production.</span>
-    <span><a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a> · <a href="/pitch">Back the proof on GoFundMe</a></span>
+    <span><a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a> · <a href="https://gofund.me/1bee77001" target="_blank" rel="noreferrer">Back the proof on GoFundMe</a></span>
   </div>
 </footer>
 
